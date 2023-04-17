@@ -1,0 +1,15 @@
+{% extends "basic.html" %} {% load static %} {% block head %}
+<style>
+	{% include 'css/login.css' %}
+</style>
+<title>Login to EX</title>
+{% endblock head %} {% block body %}
+<div class="wrapper">
+	<div class="card-container">
+		<div class="heading">
+			<span class="login-text">Log in to</span>
+			{% include "svg/exc_wr.svg" with width=120 color="var(--white)" %}
+		</div>
+	</div>
+</div>
+{% endblock body %}
