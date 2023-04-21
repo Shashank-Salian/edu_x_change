@@ -5,11 +5,113 @@
 <title>Login to EX</title>
 {% endblock head %} {% block body %}
 <div class="wrapper">
-	<div class="card-container">
+	<div class="card-container drop-shadow">
 		<div class="heading">
-			<span class="login-text">Log in to</span>
+			<p class="login-text">
+				{% if not signuppage %} Log in to {% else %} Sign up to{% endif %}
+			</p>
 			{% include "svg/exc_wr.svg" with width=120 color="var(--white)" %}
 		</div>
+		<form
+			action="/api/users/login/"
+			method="POST"
+			class="login-field {% if signuppage %} hide {% endif %}"
+		>
+			<div class="input-container">
+				<div class="input-wrapper">
+					<input
+						type="text"
+						placeholder="Username or email"
+						id="username-inp"
+						name="username"
+						value=""
+						required
+					/>
+					<label class="lbl" for="username-inp">Username or email</label>
+				</div>
+				<div class="input-wrapper">
+					<input
+						type="password"
+						placeholder="Password"
+						id="password-inp"
+						name="password"
+						value=""
+						required
+					/>
+					<label class="lbl" for="password-inp">Password</label>
+				</div>
+				<button class="btn transp forgot-pass-btn" type="button">
+					Forgot password ?
+				</button>
+			</div>
+			<p class="msg-field message-field" data-type="normal"></p>
+			<button class="btn orange large submit-btn" type="submit">Log in</button>
+			<div class="signup-txt">
+				New here ?
+				<button class="btn transp switch-signup-btn" type="button">Sign Up</button>
+			</div>
+		</form>
+		<form
+			action="/api/users/signup/"
+			method="POST"
+			class="signup-field {% if not signuppage %} hide {% endif %}"
+		>
+			<div class="input-container">
+				<div class="input-wrapper">
+					<input
+						type="text"
+						name="name"
+						id="name-inp"
+						required
+						placeholder="Name"
+					/>
+					<label class="lbl" for="name-inp">Name</label>
+				</div>
+
+				<div class="input-wrapper">
+					<input
+						type="email"
+						name="email"
+						id="email-inp"
+						required
+						placeholder="Email"
+					/>
+					<label class="lbl" for="email-inp">Email</label>
+				</div>
+
+				<div class="input-wrapper">
+					<input
+						type="text"
+						name="signup-username"
+						id="signup-username-inp"
+						required
+						placeholder="Username"
+					/>
+					<label class="lbl" for="signup-username-inp">Username</label>
+				</div>
+
+				<div class="input-wrapper">
+					<input
+						type="password"
+						name="signup-password"
+						id="signup-password-inp"
+						required
+						placeholder="Password"
+					/>
+					<label class="lbl" for="signup-password-inp">Password</label>
+				</div>
+			</div>
+			<p class="msg-field signup-message-field"></p>
+			<button class="btn orange large submit-btn" type="submit">Sign up</button>
+			<div class="signup-txt">
+				Already have an account ?
+				<button class="btn transp switch-signup-btn" type="button">Log in</button>
+			</div>
+		</form>
 	</div>
 </div>
-{% endblock body %}
+{% endblock body %} {% block scripts %}
+<script>
+	{% include "js/login.js" %}
+</script>
+{% endblock scripts %}

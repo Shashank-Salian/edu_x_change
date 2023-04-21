@@ -10,17 +10,20 @@
 			href="{% static 'EXC.svg' %}"
 			type="image/x-icon"
 		/>
-
+		<script>
+			{% include 'js/lib.js' %}
+		</script>
 		<style>
+			{% include "css/poppins.css" %}
 			{% include "css/basic.css" %}
 		</style>
-
 		{% block head %}
 		<title>Edu Xchange</title>
 		{% endblock head %}
 	</head>
 	<body>
-		{% block body %} {% endblock body %}
+		{% block body %}{% endblock body %}
+		{% block scripts %} {% endblock scripts%}
 	</body>
 </html>
 {% endspaceless %}

@@ -6,8 +6,9 @@ from minify_html_onepass import minify
 static_page_cache = {}
 
 
-def render_and_minify(template):
-	html = loader.render_to_string(template)
+def render_and_minify(template, data={}):
+	# data = {"signuppage": True}
+	html = loader.render_to_string(template, data)
 	return minify(html, minify_css=True, minify_js=True)
 
 
@@ -15,7 +16,7 @@ def home(req: HttpRequest):
 	return HttpResponse("<h1>Home Page</h1>")
 
 
-def signin(req: HttpRequest):
+def login(req: HttpRequest):
 	return HttpResponse(render_and_minify("login/index.html"))
 
 
