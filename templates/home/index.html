@@ -1,0 +1,11 @@
+{% extends 'base.html' %} {% load static %} 
+{% load django_vite %}
+{% block head %}
+<title>Edu X Change</title>
+{% endblock head %}
+{% block body %}
+<div id="root"></div>
+{% endblock body %}
+{% block scripts %}
+	{% vite_asset 'main.tsx' %}
+{% endblock scripts %}

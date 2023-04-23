@@ -1,9 +1,12 @@
-{% extends "basic.html" %} {% load static %} {% block head %}
+{% extends "basic.html" %} {% load static %}
+{% block head %}
 <style>
 	{% include 'css/login.css' %}
 </style>
 <title>Login to EX</title>
+{% load django_vite %}
 {% endblock head %} {% block body %}
+<div id="root"></div>
 <div class="wrapper">
 	<div class="card-container drop-shadow">
 		<div class="heading">
@@ -110,8 +113,10 @@
 		</form>
 	</div>
 </div>
-{% endblock body %} {% block scripts %}
-<script>
-	{% include "js/login.js" %}
-</script>
+{% endblock body %}
+{% comment %} <script>
+	{% include "login/login.js" %}
+</script> {% endcomment %}
+{% block scripts %}
+{% vite_asset 'pages/login/login.tsx' %}
 {% endblock scripts %}
