@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
 
@@ -16,6 +17,14 @@ export default defineConfig({
 			input: {
 				main: "./src/main",
 			},
+		},
+	},
+	resolve: {
+		alias: {
+			"@": resolve(__dirname, "src"),
+			"@/components": resolve(__dirname, "src", "components"),
+			"@/assets": resolve(__dirname, "src", "assets"),
+			"@/utils": resolve(__dirname, "src", "utils"),
 		},
 	},
 });

@@ -1,9 +1,13 @@
 import { render } from "preact";
 
-const Card = () => (
-	<div>
-		<h2>This is a login page!!!!</h2>
+import LoginForm from "@/components/LoginForm/LoginForm";
+
+import classes from "./login.module.css";
+
+const LoginPage = () => (
+	<div className={classes.container}>
+		<LoginForm />
 	</div>
 );
 
-render(<Card />, document.getElementById("root") as HTMLElement);
+render(<LoginPage />, document.getElementById("root") as HTMLElement);
