@@ -6,6 +6,7 @@ import classes from "./LoginForm.module.css";
 import Input from "../UI/Input/Input";
 
 import { getCookie, isValidEmail, isValidUsername } from "@/utils/utils";
+import { TargetedEvent } from "preact/compat";
 
 type Props = {
 	children?: JSX.Element | JSX.Element[];
@@ -124,10 +125,11 @@ const LoginForm = (props: Props) => {
 		}
 	}
 
-	const onSubmit = (e: SubmitEvent) => {
+	const onSubmit = (e: TargetedEvent<HTMLFormElement, Event>) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 		if (
+			isSignupForm &&
 			signupData.fullName.value.length >= 2 &&
 			isValidEmail(signupData.email.value) &&
 			isValidUsername(signupData.username.value) &&
@@ -158,6 +160,7 @@ const LoginForm = (props: Props) => {
 			<form
 				action={`/api/users/${isSignupForm ? "signup" : "login"}`}
 				method={"POST"}
+				onSubmit={onSubmit}
 			>
 				<div className={classes.inputContainer}>
 					{isSignupForm ? (
@@ -250,7 +253,6 @@ const LoginForm = (props: Props) => {
 				<button
 					className={`btn orange large ${classes.submitBtn}`}
 					type='submit'
-					// onClick={onSubmit}
 				>
 					{isSignupForm ? "Sign up" : "Log in"}
 				</button>
