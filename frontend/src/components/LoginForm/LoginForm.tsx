@@ -8,11 +8,9 @@ import Input from "../UI/Input/Input";
 import { getCookie, isValidEmail, isValidUsername } from "@/utils/utils";
 import { TargetedEvent } from "preact/compat";
 
-type Props = {
-	children?: JSX.Element | JSX.Element[];
-};
+type Props = {};
 
-const LoginForm = (props: Props) => {
+const LoginForm = (_props: Props) => {
 	const [isSignupForm, setIsSignupForm] = useState(false);
 	const [signupData, setSignupData] = useState({
 		fullName: {
@@ -53,41 +51,49 @@ const LoginForm = (props: Props) => {
 			id: "loginPassword",
 		},
 	});
+	const [messageData, setMessageData] = useState<{
+		message: string;
+		type: "normal" | "success" | "error";
+	}>({
+		message: "",
+		type: "normal",
+	});
 
-	const onSignupInput = (e: InputEvent, id: string) => {
+	const onSignupInput = (e: any, id: string) => {
+		console.log(e.currentTarget.value);
 		const newState = {
 			...signupData,
 		};
 		switch (id) {
 			case signupData.fullName.id:
-				newState.fullName.value += e.data;
+				newState.fullName.value = e.currentTarget.value;
 				break;
 			case signupData.email.id:
-				newState.email.value += e.data;
+				newState.email.value = e.currentTarget.value;
 				break;
 			case signupData.username.id:
-				newState.username.value += e.data;
+				newState.username.value = e.currentTarget.value;
 				break;
 			case signupData.password.id:
-				newState.password.value += e.data;
+				newState.password.value = e.currentTarget.value;
 				break;
 			case signupData.confirmPassword.id:
-				newState.confirmPassword.value += e.data;
+				newState.confirmPassword.value = e.currentTarget.value;
 				break;
 		}
 		setSignupData(newState);
 	};
 
-	const onSignInInput = (e: InputEvent, id: string) => {
+	const onSignInInput = (e: any, id: string) => {
 		const newState = {
 			...signinData,
 		};
 		switch (id) {
 			case signinData.username.id:
-				newState.username.value += e.data;
+				newState.username.value = e.currentTarget.value;
 				break;
 			case signinData.password.id:
-				newState.password.value += e.data;
+				newState.password.value = e.currentTarget.value;
 				break;
 		}
 		setSigninData(newState);
@@ -117,9 +123,16 @@ const LoginForm = (props: Props) => {
 
 			const res = await rawRes.json();
 			console.log(res);
-			// if (res.error) signupMsgField.setAttribute("data-type", "error");
-			// else if (res.ok) signupMsgField.setAttribute("data-type", "success");
-			// signupMsgField.textContent = res.message;
+			if (res.error)
+				setMessageData({
+					message: res.message,
+					type: "error",
+				});
+			else
+				setMessageData({
+					message: res.message,
+					type: "success",
+				});
 		} catch (error) {
 			console.log(error);
 		}
@@ -162,7 +175,7 @@ const LoginForm = (props: Props) => {
 				method={"POST"}
 				onSubmit={onSubmit}
 			>
-				<div className={classes.inputContainer}>
+				<div className={`mt-40`}>
 					{isSignupForm ? (
 						<>
 							<Input
@@ -174,6 +187,7 @@ const LoginForm = (props: Props) => {
 								onInput={(e: InputEvent) =>
 									onSignupInput(e, signupData.fullName.id)
 								}
+								className='mt-30'
 							/>
 							<Input
 								type='email'
@@ -185,6 +199,7 @@ const LoginForm = (props: Props) => {
 								onInput={(e: InputEvent) =>
 									onSignupInput(e, signupData.email.id)
 								}
+								className='mt-30'
 							/>
 							<Input
 								id={signupData.username.id}
@@ -195,6 +210,7 @@ const LoginForm = (props: Props) => {
 								onInput={(e: InputEvent) =>
 									onSignupInput(e, signupData.username.id)
 								}
+								className='mt-30'
 							/>
 							<Input
 								id={signupData.password.id}
@@ -206,6 +222,7 @@ const LoginForm = (props: Props) => {
 								onInput={(e: InputEvent) =>
 									onSignupInput(e, signupData.password.id)
 								}
+								className='mt-30'
 							/>
 							<Input
 								id={signupData.confirmPassword.id}
@@ -217,6 +234,7 @@ const LoginForm = (props: Props) => {
 								onInput={(e: InputEvent) =>
 									onSignupInput(e, signupData.confirmPassword.id)
 								}
+								className='mt-30'
 							/>
 						</>
 					) : (
@@ -229,6 +247,7 @@ const LoginForm = (props: Props) => {
 								onInput={(e: InputEvent) =>
 									onSignInInput(e, signinData.username.id)
 								}
+								className='mt-30'
 							/>
 							<Input
 								id={signinData.password.id}
@@ -239,19 +258,22 @@ const LoginForm = (props: Props) => {
 								onInput={(e: InputEvent) =>
 									onSignInInput(e, signinData.password.id)
 								}
+								className='mt-30'
 							/>
-							<button
-								className={`btn transp ${classes.forgotPassBtn}`}
-								type='button'
-							>
+							<button className={`btn transp mt-10`} type='button'>
 								Forgot password ?
 							</button>
 						</>
 					)}
 				</div>
-				<p className={classes.msgField} data-type='normal'></p>
+				<p
+					className={`mt-20 mb-20 ${classes.msgField}`}
+					data-type={messageData.type}
+				>
+					{messageData.message}
+				</p>
 				<button
-					className={`btn orange large ${classes.submitBtn}`}
+					className={`btn orange large mb-30 ${classes.submitBtn}`}
 					type='submit'
 				>
 					{isSignupForm ? "Sign up" : "Log in"}

@@ -1,0 +1,14 @@
+.container {
+	height: 80px;
+}
+
+.wrapper {
+	height: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.searchContainer {
+	width: 33.3%;
+}

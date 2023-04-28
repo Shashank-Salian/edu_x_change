@@ -1,7 +1,6 @@
 .container {
 	position: relative;
 	width: 100%;
-	margin: 30px 0 0 0;
 }
 
 .lbl {
@@ -15,12 +14,19 @@
 	left: 14px;
 	font-size: 1rem;
 	transition: all 0.2s ease-in-out;
+	width: max-content;
 }
 
 .input:focus+.lbl {
 	top: -22px;
 	opacity: 1;
 	color: var(--white);
+}
+
+.input:focus+.lbl.black {
+	top: -22px;
+	opacity: 1;
+	color: var(--black);
 }
 
 .levitate {
@@ -33,4 +39,8 @@
 	width: 100%;
 	padding: 8px 12px;
 	border: 2px solid var(--orange);
+}
+
+.levitate.black {
+	color: var(--black);
 }

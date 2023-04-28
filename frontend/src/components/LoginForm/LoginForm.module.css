@@ -16,18 +16,9 @@
 	margin-bottom: 4px;
 }
 
-.inputContainer {
-	margin-top: 45px;
-}
-
-.forgotPassBtn {
-	margin-top: 8px;
-}
-
 .msgField {
 	min-height: 10px;
 	text-align: center;
-	margin: 20px 0;
 }
 
 .msgField[data-type=error] {
@@ -40,7 +31,6 @@
 
 .submitBtn {
 	width: 100%;
-	margin-bottom: 28px;
 }
 
 .switchContainer {
