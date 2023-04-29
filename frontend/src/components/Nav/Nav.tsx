@@ -1,16 +1,24 @@
+import { useState } from "preact/hooks";
+
 import Logo from "@/assets/logos/ExcWritten";
 
 import classes from "./Nav.module.css";
 import Input from "../UI/Input/Input";
 import usePortal from "@/hooks/usePortal";
-import Card from "../Card/Card";
+import CreateCommunityCard from "@/components/home/CreateCommunity/CreateCommunityCard";
 
 type Props = {};
 
 const Nav = (_props: Props) => {
-	usePortal(<Card heading='Create Community' />, {
-		show: true,
-		closeOnBackdropClick: true,
+	const [showCreateCommunityCard, setShowCreateCommunityCard] = useState(false);
+
+	const toggleCreateCommunityCard = () => {
+		setShowCreateCommunityCard((old) => !old);
+	};
+
+	usePortal(<CreateCommunityCard onCloseClick={toggleCreateCommunityCard} />, {
+		show: showCreateCommunityCard,
+		onBackdropClick: toggleCreateCommunityCard,
 	});
 
 	return (
@@ -26,11 +34,16 @@ const Nav = (_props: Props) => {
 						name='search'
 						placeholder='Search Community'
 						value=''
-						blackLbl
+						className='fw'
 					/>
 				</div>
 				<div>
-					<button className={`btn blue mr-20`}>Create community +</button>
+					<button
+						className={`btn blue mr-20`}
+						onClick={toggleCreateCommunityCard}
+					>
+						Create community +
+					</button>
 				</div>
 			</div>
 		</div>

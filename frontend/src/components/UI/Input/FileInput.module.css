@@ -1,0 +1,43 @@
+.container {
+	position: relative;
+	display: inline-block;
+}
+
+.imgInp {
+	display: block;
+	width: 100px;
+	height: 100px;
+	opacity: 0;
+	cursor: pointer;
+	padding-top: 100px;
+	position: relative;
+	z-index: 4;
+}
+
+.imgInpContainer {
+	width: 100px !important;
+	height: 100px !important;
+	background-color: var(--white);
+	border-radius: 50%;
+	border: 2px solid var(--orange);
+}
+
+.inpContainer {
+	position: absolute;
+	width: 165px;
+	height: 42px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1;
+}
+
+.inp {
+	position: relative;
+	cursor: pointer;
+	width: 165px;
+	height: 42px;
+	padding-top: 42px;
+	opacity: 0;
+	z-index: 4;
+}

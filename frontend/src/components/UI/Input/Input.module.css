@@ -1,6 +1,6 @@
 .container {
 	position: relative;
-	width: 100%;
+	display: inline-block;
 }
 
 .lbl {
@@ -20,27 +20,46 @@
 .input:focus+.lbl {
 	top: -22px;
 	opacity: 1;
-	color: var(--white);
 }
 
-.input:focus+.lbl.black {
+.input:focus+.lbl.white {
 	top: -22px;
 	opacity: 1;
-	color: var(--black);
+	color: var(--white);
 }
 
 .levitate {
 	top: -22px;
 	opacity: 1;
-	color: var(--white);
+}
+
+.txtAreaLbl {
+	top: 8px;
 }
 
 .input {
 	width: 100%;
 	padding: 8px 12px;
 	border: 2px solid var(--orange);
+	border-radius: 8px;
 }
 
-.levitate.black {
-	color: var(--black);
+.input[data-resize=none] {
+	resize: none;
+}
+
+.input[data-resize=vertical] {
+	resize: vertical;
+}
+
+.input[data-resize=both] {
+	resize: both;
+}
+
+.input[data-resize=horizontal] {
+	resize: horizontal;
+}
+
+.levitate.white {
+	color: var(--white);
 }

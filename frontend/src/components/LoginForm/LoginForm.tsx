@@ -1,4 +1,3 @@
-import { JSX } from "preact";
 import { useState } from "preact/hooks";
 import ExcWritten from "@/assets/logos/ExcWritten";
 
@@ -12,45 +11,61 @@ type Props = {};
 
 const LoginForm = (_props: Props) => {
 	const [isSignupForm, setIsSignupForm] = useState(false);
-	const [signupData, setSignupData] = useState({
-		fullName: {
-			valid: false,
-			value: "",
+	const [signupData, setSignupData] = useState([
+		{
 			id: "signupName",
-		},
-		email: {
+			type: "text",
 			valid: false,
 			value: "",
+			placeholder: "Name",
+		},
+		{
 			id: "signupEmail",
-		},
-		username: {
+			type: "email",
 			valid: false,
 			value: "",
+			placeholder: "Email",
+		},
+		{
 			id: "signupUsername",
-		},
-		password: {
+			type: "text",
 			valid: false,
 			value: "",
+			placeholder: "Username",
+		},
+		{
 			id: "signupPassword",
-		},
-		confirmPassword: {
+			type: "password",
 			valid: false,
 			value: "",
+			placeholder: "Password",
+		},
+		{
 			id: "signupConfirmPassword",
-		},
-	});
-	const [signinData, setSigninData] = useState({
-		username: {
+			type: "password",
 			valid: false,
 			value: "",
+			placeholder: "Confirm password",
+		},
+	]);
+
+	const [signinData, setSigninData] = useState([
+		{
 			id: "loginUsername",
-		},
-		password: {
+			type: "text",
 			valid: false,
 			value: "",
-			id: "loginPassword",
+			placeholder: "Username or Email",
 		},
-	});
+		{
+			id: "loginPassword",
+			type: "password",
+			valid: false,
+			value: "",
+			placeholder: "Password",
+		},
+	]);
+
 	const [messageData, setMessageData] = useState<{
 		message: string;
 		type: "normal" | "success" | "error";
@@ -59,44 +74,20 @@ const LoginForm = (_props: Props) => {
 		type: "normal",
 	});
 
-	const onSignupInput = (e: any, id: string) => {
-		console.log(e.currentTarget.value);
-		const newState = {
-			...signupData,
-		};
-		switch (id) {
-			case signupData.fullName.id:
-				newState.fullName.value = e.currentTarget.value;
-				break;
-			case signupData.email.id:
-				newState.email.value = e.currentTarget.value;
-				break;
-			case signupData.username.id:
-				newState.username.value = e.currentTarget.value;
-				break;
-			case signupData.password.id:
-				newState.password.value = e.currentTarget.value;
-				break;
-			case signupData.confirmPassword.id:
-				newState.confirmPassword.value = e.currentTarget.value;
-				break;
-		}
-		setSignupData(newState);
+	const onSignupInput = (e: TargetedEvent<HTMLInputElement>, i: number) => {
+		setSignupData((oldData) => {
+			const newData = [...oldData];
+			newData[i].value = e.currentTarget.value;
+			return newData;
+		});
 	};
 
-	const onSignInInput = (e: any, id: string) => {
-		const newState = {
-			...signinData,
-		};
-		switch (id) {
-			case signinData.username.id:
-				newState.username.value = e.currentTarget.value;
-				break;
-			case signinData.password.id:
-				newState.password.value = e.currentTarget.value;
-				break;
-		}
-		setSigninData(newState);
+	const onSignInInput = (e: TargetedEvent<HTMLInputElement>, i: number) => {
+		setSigninData((oldData) => {
+			const newData = [...oldData];
+			newData[i].value = e.currentTarget.value;
+			return newData;
+		});
 	};
 
 	async function signup(
@@ -141,19 +132,20 @@ const LoginForm = (_props: Props) => {
 	const onSubmit = (e: TargetedEvent<HTMLFormElement, Event>) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
+		console.log(signupData);
 		if (
 			isSignupForm &&
-			signupData.fullName.value.length >= 2 &&
-			isValidEmail(signupData.email.value) &&
-			isValidUsername(signupData.username.value) &&
-			signupData.password.value.length >= 8 &&
-			signupData.confirmPassword.value === signupData.password.value
+			signupData[0].value.length >= 2 &&
+			isValidEmail(signupData[1].value) &&
+			isValidUsername(signupData[2].value) &&
+			signupData[3].value.length >= 8 &&
+			signupData[4].value === signupData[3].value
 		) {
 			signup(
-				signupData.fullName.value,
-				signupData.email.value,
-				signupData.username.value,
-				signupData.password.value
+				signupData[0].value,
+				signupData[1].value,
+				signupData[2].value,
+				signupData[3].value
 			);
 		}
 	};
@@ -177,89 +169,35 @@ const LoginForm = (_props: Props) => {
 			>
 				<div className={`mt-40`}>
 					{isSignupForm ? (
-						<>
+						signupData.map((eleData, i) => (
 							<Input
-								id={signupData.fullName.id}
-								placeholder='Name'
-								name='name'
+								key={i}
+								id={eleData.id}
+								type={eleData.type}
+								placeholder={eleData.placeholder}
+								name={eleData.id}
 								required
-								value={signupData.fullName.value}
-								onInput={(e: InputEvent) =>
-									onSignupInput(e, signupData.fullName.id)
-								}
-								className='mt-30'
+								value={eleData.value}
+								onInput={(e) => onSignupInput(e, i)}
+								className='mt-30 fw'
+								whiteLbl
 							/>
-							<Input
-								type='email'
-								id={signupData.email.id}
-								placeholder='Email'
-								required
-								name='email'
-								value={signupData.email.value}
-								onInput={(e: InputEvent) =>
-									onSignupInput(e, signupData.email.id)
-								}
-								className='mt-30'
-							/>
-							<Input
-								id={signupData.username.id}
-								placeholder='Username'
-								name='signup-username'
-								required
-								value={signupData.username.value}
-								onInput={(e: InputEvent) =>
-									onSignupInput(e, signupData.username.id)
-								}
-								className='mt-30'
-							/>
-							<Input
-								id={signupData.password.id}
-								type='password'
-								placeholder='Password'
-								name='signup-password'
-								required
-								value={signupData.password.value}
-								onInput={(e: InputEvent) =>
-									onSignupInput(e, signupData.password.id)
-								}
-								className='mt-30'
-							/>
-							<Input
-								id={signupData.confirmPassword.id}
-								type='password'
-								placeholder='Confirm Password'
-								name='confirm-password'
-								required
-								value={signupData.confirmPassword.value}
-								onInput={(e: InputEvent) =>
-									onSignupInput(e, signupData.confirmPassword.id)
-								}
-								className='mt-30'
-							/>
-						</>
+						))
 					) : (
 						<>
-							<Input
-								id={signinData.username.id}
-								placeholder='Username or Email'
-								required
-								value={signinData.username.value}
-								onInput={(e: InputEvent) =>
-									onSignInInput(e, signinData.username.id)
-								}
-								className='mt-30'
-							/>
-							<Input
-								id={signinData.password.id}
-								placeholder='Password'
-								type='password'
-								required
-								value={signinData.password.value}
-								onInput={(e: InputEvent) =>
-									onSignInInput(e, signinData.password.id)
-								}
-								className='mt-30'
-							/>
+							{signinData.map((eleData, i) => (
+								<Input
+									key={i}
+									id={eleData.id}
+									type={eleData.type}
+									placeholder={eleData.placeholder}
+									value={eleData.value}
+									required
+									onInput={(e) => onSignInInput(e, i)}
+									className='mt-30 fw'
+									whiteLbl
+								/>
+							))}
 							<button className={`btn transp mt-10`} type='button'>
 								Forgot password ?
 							</button>
@@ -273,7 +211,7 @@ const LoginForm = (_props: Props) => {
 					{messageData.message}
 				</p>
 				<button
-					className={`btn orange large mb-30 ${classes.submitBtn}`}
+					className={`btn orange large shadow mb-30 ${classes.submitBtn}`}
 					type='submit'
 				>
 					{isSignupForm ? "Sign up" : "Log in"}
