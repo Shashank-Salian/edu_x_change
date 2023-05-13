@@ -1,11 +1,13 @@
 .container {
+	margin: 20px;
 	width: 100vw;
 	max-width: 700px;
+	/* overflow-y: hidden; */
 }
 
 .wrapper {
 	display: grid;
-	grid-template-columns: max-content auto;
+	grid-template-columns: minmax(auto, max-content) minmax(280px, 1fr);
 	gap: 40px;
 	align-items: center;
 }
@@ -17,4 +19,15 @@
 
 .inp {
 	width: 100%;
+}
+
+@media screen and (max-width: 500px) {
+	.wrapper {
+		grid-template-columns: auto;
+		gap: 10px;
+	}
+
+	.inp {
+		margin-bottom: 30px;
+	}
 }

@@ -39,7 +39,7 @@ const Nav = (_props: Props) => {
 				</div>
 				<div>
 					<button
-						className={`btn blue mr-20`}
+						className={`btn blue shadow mr-20`}
 						onClick={toggleCreateCommunityCard}
 					>
 						Create community +

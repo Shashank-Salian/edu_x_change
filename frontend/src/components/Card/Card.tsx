@@ -26,7 +26,7 @@ const Card = (props: Props) => {
 					{props.boldHead ? <h2>{props.heading}</h2> : props.heading}
 					{props.icon ? (
 						<div className={classes.icon} onClick={props.onIconClick}>
-							{props.icon === "close" ? <Cross /> : null}
+							{props.icon === "close" ? <Cross width='24' /> : null}
 						</div>
 					) : null}
 				</div>

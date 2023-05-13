@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.template import loader
 from minify_html_onepass import minify
+from django.middleware.csrf import get_token
 
 static_page_cache = {}
 
@@ -13,10 +14,13 @@ def render_and_minify(template, data={}):
 
 
 def home(req: HttpRequest):
-	return HttpResponse(render_and_minify("home/index.html"))
+	res = HttpResponse(render_and_minify("home/index.html"))
+	get_token(req)
+	return res
 
 
 def login(req: HttpRequest):
+	get_token(req)
 	return HttpResponse(render_and_minify("login/index.html"))
 
 

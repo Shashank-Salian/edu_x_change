@@ -11,7 +11,7 @@ type Props = {
 	required?: boolean;
 	name?: string;
 	whiteLbl?: boolean;
-	onInput?: JSX.GenericEventHandler<HTMLInputElement>;
+	onInput?: JSX.GenericEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 	borderClr?: string;
 	noLbl?: boolean;
 	resize?: "horizontal" | "vertical" | "none" | "both";
@@ -32,8 +32,12 @@ const Input = (props: Props) => {
 				/>
 			) : (
 				<textarea
-					className={`lite-shadow ${classes.input}`}
+					className={`lite-shadow ${classes.input} ${
+						props.type === "textarea" ? classes.textArea : ""
+					}`}
 					data-resize={props.resize}
+					onInput={props.onInput}
+					name={props.name}
 				>
 					{props.value}
 				</textarea>
@@ -41,11 +45,9 @@ const Input = (props: Props) => {
 			{props.noLbl ? null : (
 				<label
 					htmlFor={props.id}
-					className={`${classes.lbl} ${
-						props.value !== "" ? classes.levitate : ""
-					} ${props.whiteLbl ? classes.white : ""} ${
+					className={`${classes.lbl} ${props.whiteLbl ? classes.white : ""} ${
 						props.type === "textarea" ? classes.txtAreaLbl : ""
-					}`}
+					} ${props.value !== "" ? classes.levitate : ""}`}
 				>
 					{props.placeholder}
 				</label>

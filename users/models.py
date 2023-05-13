@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from .utils import *
-from .exceptions import UserAlreadyExistException
+from basic.utils import *
+from basic.exceptions import AlreadyExistException
 
 # from posts.models import Posts
 # from community.models import Community
@@ -21,15 +21,14 @@ class Users(models.Model):
 		if is_valid_name(self.name) and is_valid_email(
 		    self.email) and is_valid_password(
 		        self.password) and is_valid_username(self.username):
-			if not self.user_exists(self.username):
-				super().save(*args, **kwargs)
-				return
-			raise UserAlreadyExistException(
-			    f"User with '{self.username}' username already exist",
-			    "USERNAME_TAKEN")
-		else:
-			raise ValidationError("Some fields submitted were invalid",
-			                      "INVALID_FIELD")
+			if self.user_exists(self.username):
+				raise AlreadyExistException(
+				    f"User with '{self.username}' username already exist",
+				    "USERNAME_TAKEN")
+			super().save(*args, **kwargs)
+			return
+		raise ValidationError("Some fields submitted were invalid!",
+		                      "INVALID_FIELD")
 
 	def user_exists(self, username):
 		try:

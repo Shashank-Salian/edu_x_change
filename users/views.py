@@ -3,8 +3,8 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.core.exceptions import ValidationError
 
 from .models import Users
-from .exceptions import UserAlreadyExistException
-from .utils import *
+from basic.exceptions import AlreadyExistException
+from basic.utils import *
 
 import json
 
@@ -29,7 +29,7 @@ def signupuser(req: HttpRequest):
 		except ValidationError as e:
 			resp = create_response_data(e.message, error=True, code=e.code)
 			return JsonResponse(resp, status=406)
-		except UserAlreadyExistException as e:
+		except AlreadyExistException as e:
 			resp = create_response_data(e.message, error=True, code=e.code)
 			return JsonResponse(resp, status=409)
 	resp = create_response_data("Wrong method", error=True)

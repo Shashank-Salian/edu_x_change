@@ -20,16 +20,16 @@ const usePortal = (comp: ComponentChild | null, props: Props) => {
 
 			render(
 				<>
-					<div
-						onClick={onBackdropClick}
-						className={
-							props.showBackdrop === undefined || props.showBackdrop
-								? "backdrop"
-								: undefined
-						}
-					></div>
 					<div className={`portal-container`}>
-						<div style={{ zIndex: 3 }}>{comp}</div>
+						{comp}
+						<div
+							onClick={onBackdropClick}
+							className={
+								props.showBackdrop === undefined || props.showBackdrop
+									? "backdrop"
+									: undefined
+							}
+						></div>
 					</div>
 				</>,
 				ele

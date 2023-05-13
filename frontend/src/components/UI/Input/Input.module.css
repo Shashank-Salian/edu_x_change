@@ -29,8 +29,13 @@
 }
 
 .levitate {
-	top: -22px;
+	top: -22px !important;
 	opacity: 1;
+}
+
+.textArea {
+	max-height: 250px;
+	min-height: 45px;
 }
 
 .txtAreaLbl {

@@ -1,3 +1,4 @@
+import { JSX } from "preact";
 import { useState } from "preact/hooks";
 import ExcWritten from "@/assets/logos/ExcWritten";
 
@@ -74,7 +75,10 @@ const LoginForm = (_props: Props) => {
 		type: "normal",
 	});
 
-	const onSignupInput = (e: TargetedEvent<HTMLInputElement>, i: number) => {
+	const onSignupInput = (
+		e: TargetedEvent<HTMLInputElement | HTMLTextAreaElement>,
+		i: number
+	) => {
 		setSignupData((oldData) => {
 			const newData = [...oldData];
 			newData[i].value = e.currentTarget.value;
@@ -82,7 +86,10 @@ const LoginForm = (_props: Props) => {
 		});
 	};
 
-	const onSignInInput = (e: TargetedEvent<HTMLInputElement>, i: number) => {
+	const onSignInInput = (
+		e: TargetedEvent<HTMLInputElement | HTMLTextAreaElement>,
+		i: number
+	) => {
 		setSigninData((oldData) => {
 			const newData = [...oldData];
 			newData[i].value = e.currentTarget.value;
@@ -107,9 +114,9 @@ const LoginForm = (_props: Props) => {
 			const rawRes = await fetch("/api/users/signup/", {
 				method: "POST",
 				body: JSON.stringify(data),
-				headers: {
+				headers: new Headers({
 					"X-CSRFToken": getCookie("csrftoken")!,
-				},
+				}),
 			});
 
 			const res = await rawRes.json();
@@ -133,6 +140,8 @@ const LoginForm = (_props: Props) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 		console.log(signupData);
+		console.log(getCookie("csrftoken"));
+
 		if (
 			isSignupForm &&
 			signupData[0].value.length >= 2 &&

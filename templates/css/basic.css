@@ -95,7 +95,7 @@ a {
 }
 
 #portal .portal-container {
-	position: absolute;
+	position: fixed;
 	display: flex;
 	justify-content: center;
 	inset: 0;
@@ -106,14 +106,11 @@ a {
 }
 
 #portal .backdrop {
-	position: absolute;
-	display: flex;
-	justify-content: center;
+	position: fixed;
 	inset: 0;
-	align-items: center;
 	color: #fff;
 	background-color: #000000ab;
-	z-index: 2;
+	z-index: -1;
 }
 
 .fw {
