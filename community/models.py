@@ -1,6 +1,7 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from users.models import Users
+
+from basic.exceptions import AlreadyExistException, ValidationException
 
 
 # Create your models here.
@@ -13,7 +14,7 @@ class Community(models.Model):
 	)
 	topic = models.CharField(max_length=25, default=None)
 	description = models.CharField(max_length=500, default=None)
-	icon_path = models.ImageField(upload_to='community_icons/',
+	icon_path = models.ImageField(upload_to='userassets/community_icons/',
 	                              default=None,
 	                              null=True)
 
@@ -30,9 +31,20 @@ class Community(models.Model):
 		    self.name) > 25 or self.topic is None or len(
 		        self.topic) < 3 or len(self.topic) > 25 or len(
 		            self.description) > 500:
-			raise ValidationError("Some field entered were invalid!",
-			                      "INVALID_FIELD")
+			raise ValidationException("Some field entered were invalid!",
+			                          "INVALID_FIELD")
+		if self.community_exists(self.name):
+			raise AlreadyExistException(
+			    f"Community with name {self.name} already exists",
+			    "COMMUNITY_NAME_TAKEN")
 		super().save(*args, **kwargs)
+
+	def community_exists(self, name):
+		try:
+			Community.objects.get(name=name)
+			return True
+		except Community.DoesNotExist:
+			return False
 
 	def __str__(self) -> str:
 		return self.name

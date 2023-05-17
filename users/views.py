@@ -11,26 +11,23 @@ import json
 
 # Create your views here.
 def signupuser(req: HttpRequest):
-	if req.method == "POST":
-		jsondata = json.loads(req.body)
-		name = jsondata['fullName']
-		email = jsondata['email']
-		username = jsondata['userName']
-		password = jsondata['password']
+	if req.method != "POST":
+		resp = create_resp_data("Wrong method", error=True)
+		return JsonResponse(resp, status=400)
 
-		try:
-			u = Users(name=name,
-			          email=email,
-			          username=username,
-			          password=password)
-			u.save()
-			resp = create_response_data("User created successfully")
-			return JsonResponse(resp)
-		except ValidationError as e:
-			resp = create_response_data(e.message, error=True, code=e.code)
-			return JsonResponse(resp, status=406)
-		except AlreadyExistException as e:
-			resp = create_response_data(e.message, error=True, code=e.code)
-			return JsonResponse(resp, status=409)
-	resp = create_response_data("Wrong method", error=True)
-	return JsonResponse(resp, status=412)
+	name = req.POST.get("fullName", None)
+	email = req.POST.get("email", None)
+	username = req.POST.get("userName", None)
+	password = req.POST.get("password", None)
+
+	try:
+		u = Users(name=name, email=email, username=username, password=password)
+		u.save()
+		resp = success_resp_data("User created successfully")
+		return JsonResponse(resp)
+	except ValidationError as e:
+		resp = error_resp_data(e)
+		return JsonResponse(resp, status=406)
+	except AlreadyExistException as e:
+		resp = error_resp_data(e)
+		return JsonResponse(resp, status=409)

@@ -31,3 +31,5 @@ ENV/
 
 # Frontend
 node_modules/
+
+userassets/

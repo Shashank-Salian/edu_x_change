@@ -104,19 +104,20 @@ const LoginForm = (_props: Props) => {
 		password: string
 	) {
 		console.log(fullName, email, userName, password);
-		const data: any = {
-			fullName,
-			email,
-			userName,
-			password,
-		};
+
+		const formData = new FormData();
+		formData.append("fullName", fullName);
+		formData.append("email", email);
+		formData.append("userName", userName);
+		formData.append("password", password);
+
 		try {
 			const rawRes = await fetch("/api/users/signup/", {
 				method: "POST",
-				body: JSON.stringify(data),
 				headers: new Headers({
 					"X-CSRFToken": getCookie("csrftoken")!,
 				}),
+				body: formData,
 			});
 
 			const res = await rawRes.json();

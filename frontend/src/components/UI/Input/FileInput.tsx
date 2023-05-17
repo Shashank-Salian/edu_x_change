@@ -1,9 +1,9 @@
 import { JSX } from "preact";
-import { useState } from "preact/hooks";
 
 import Upload from "@/assets/icons/Upload";
 import classes from "./FileInput.module.css";
 import AddPicture from "@/assets/icons/AddPicture";
+import { useEffect } from "preact/hooks";
 
 type Props = {
 	className?: string;
@@ -16,42 +16,35 @@ type Props = {
 	accept?: string;
 	image?: boolean;
 	text?: string;
+	preview?: string;
+	width?: string;
 };
 
 const FileInput = (props: Props) => {
-	const [file, setFile] = useState<File | null>(null);
-
-	const onFileInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
-		console.log(e.currentTarget.files);
-		if (props.onInput) props.onInput(e);
-		if (e.currentTarget.files && e.currentTarget.files.length !== 0) {
-			const file = e.currentTarget.files[0];
-			setFile(file);
-		}
-	};
-
+	useEffect(() => {
+		console.log("first");
+	});
 	return (
 		<div className={`${classes.container} ${props.className || ""}`}>
-			{!file ? (
-				<div
-					className={`${classes.inpContainer} ${
-						props.image
-							? `lite-shadow ${classes.imgInpContainer}`
-							: `btn orange shadow`
-					}`}
-				>
+			{!props.image ? (
+				<div className={`${classes.inpContainer} btn orange shadow`}>
 					{props.text}
-					{props.image ? (
-						<AddPicture width='58' color='var(--black)' />
-					) : (
-						<Upload color='#fff' className='ml-10' width='22' />
-					)}
+					<Upload color='#fff' className='ml-10' width='22' />
 				</div>
 			) : (
-				<img
-					src={URL.createObjectURL(file)}
-					className={`${classes.inpContainer} ${classes.imgInpContainer}`}
-				/>
+				<>
+					<div
+						className={`${classes.inpContainer} ${classes.imgInpContainer} lite-shadow`}
+					>
+						<AddPicture width='58' color='var(--black)' />
+					</div>
+					{props.preview ? (
+						<img
+							src={props.preview}
+							className={`${classes.inpContainer} ${classes.imgInpContainer}`}
+						/>
+					) : null}
+				</>
 			)}
 			<input
 				type='file'
@@ -59,7 +52,8 @@ const FileInput = (props: Props) => {
 				name={props.name}
 				required={props.required}
 				accept={props.accept}
-				onInput={props.image ? onFileInput : props.onInput}
+				onInput={props.onInput}
+				style={props.width ? { width: props.width } : undefined}
 				className={`${props.image ? `mb-10 ${classes.imgInp}` : classes.inp}`}
 			/>
 			<label htmlFor={props.id} className={`${!props.image ? "ml-20" : ""}`}>

@@ -13,13 +13,8 @@ type Props = {
 	onCloseClick?: JSX.MouseEventHandler<HTMLDivElement>;
 };
 
-type IconData = {
-	fileName: string | null;
-	fileData: string | null;
-};
-
 const CreateCommunityCard = (props: Props) => {
-	const [iconInpData, setIconInpData] = useState<File | null>(null);
+	const [iconInpData, setIconInpData] = useState<{ file: File; url: string }>();
 	const [textInpData, setTextInpData] = useState({
 		commName: {
 			name: "community-name",
@@ -40,7 +35,10 @@ const CreateCommunityCard = (props: Props) => {
 
 		if (files && files.length !== 0) {
 			const [file] = files;
-			setIconInpData(file);
+			setIconInpData({
+				file,
+				url: URL.createObjectURL(file),
+			});
 		}
 	};
 
@@ -74,13 +72,11 @@ const CreateCommunityCard = (props: Props) => {
 			const formData = new FormData();
 			formData.append("communityName", textInpData.commName.value);
 			formData.append("topic", textInpData.topic.value);
-			// formData.append("description", textInpData.description.value);
+			formData.append("description", textInpData.description.value);
 
 			if (iconInpData) {
-				formData.append("communityIcon", iconInpData);
+				formData.append("communityIcon", iconInpData.file);
 			}
-
-			console.log(formData.entries());
 
 			try {
 				const rawRes = await fetch("/api/community/create/", {
@@ -114,10 +110,12 @@ const CreateCommunityCard = (props: Props) => {
 							name='community-icon'
 							id='communityIconPic'
 							placeholder={
-								iconInpData ? iconInpData.name : ".png / .jpg / .jpeg"
+								iconInpData ? iconInpData.file.name : ".png / .jpg / .jpeg"
 							}
 							accept='.jpg, .jpeg, .png'
+							text='Upload your community icon'
 							image
+							preview={iconInpData?.url}
 							onInput={onIconInput}
 							className={classes.inp}
 						/>
