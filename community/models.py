@@ -18,13 +18,10 @@ class Community(models.Model):
 	                              default=None,
 	                              null=True)
 
-	admin = models.ForeignKey("users.Users",
-	                          related_name='admin_of',
-	                          null=True,
-	                          on_delete=models.SET_NULL)
-
-	# posts: models.ForeignKey[models.Model] = models.ForeignKey(
-	#     "posts.Posts", on_delete=models.SET_NULL)
+	moderator = models.ForeignKey("users.Users",
+	                              related_name='moderator_of',
+	                              null=True,
+	                              on_delete=models.SET_NULL)
 
 	def save(self, *args, **kwargs):
 		if self.name is None or len(self.name) < 3 or len(

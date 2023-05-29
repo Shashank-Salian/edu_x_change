@@ -1,23 +1,60 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from basic.utils import *
-from basic.exceptions import AlreadyExistException
+from basic.exceptions import AlreadyExistException, ValidationException
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 
 # from posts.models import Posts
 # from community.models import Community
 
 
+class UsersManager(BaseUserManager):
+
+	def create_user(self, username, password, email, name, **extra_fields):
+		if not username:
+			raise ValueError('Users must have a username')
+		user: Users = self.model(username=username,
+		                         email=email,
+		                         name=name,
+		                         **extra_fields)
+		user.password = make_password(password, salt=username)
+		user.validate_user()
+		user.save()
+		return user
+
+	def create_superuser(self, username, password, email, name,
+	                     **extra_fields):
+		extra_fields.setdefault('is_staff', True)
+		extra_fields.setdefault('is_superuser', True)
+
+		if extra_fields.get('is_staff') is not True:
+			raise ValueError('Superuser must have is_staff=True.')
+
+		return self.create_user(username, password, email, name,
+		                        **extra_fields)
+
+	def get_by_natural_key(self, username):
+		return self.get(username=username)
+
+
 # Create your models here.
-class Users(models.Model):
+class Users(AbstractBaseUser, PermissionsMixin):
 	name = models.CharField(max_length=35)
 	username = models.CharField(max_length=20, unique=True)
 	password = models.CharField(max_length=100)
 	email = models.EmailField(max_length=50)
 	created_time = models.DateTimeField(auto_now_add=True)
 
-	# session = models.CharField()
+	is_staff = models.BooleanField(default=False)
+	is_superuser = models.BooleanField(default=False)
 
-	def save(self, *args, **kwargs):
+	USERNAME_FIELD = 'username'
+	REQUIRED_FIELDS = ['password', 'email', 'name']
+
+	objects = UsersManager()
+
+	def validate_user(self):
 		if is_valid_name(self.name) and is_valid_email(
 		    self.email) and is_valid_password(
 		        self.password) and is_valid_username(self.username):
@@ -25,10 +62,9 @@ class Users(models.Model):
 				raise AlreadyExistException(
 				    f"User with '{self.username}' username already exist",
 				    "USERNAME_TAKEN")
-			super().save(*args, **kwargs)
-			return
-		raise ValidationError("Some fields submitted were invalid!",
-		                      "INVALID_FIELD")
+			return True
+		raise ValidationException("Some fields submitted were invalid!",
+		                          "INVALID_FIELD")
 
 	def user_exists(self, username):
 		try:
@@ -37,8 +73,25 @@ class Users(models.Model):
 		except Users.DoesNotExist:
 			return False
 
+	def authenticate(self, pwd):
+		if self.check_password(pwd):
+			return self
+		return None
+
+	def has_perm(self, perm):
+		print("permissions asked : " + perm)
+		if self.is_superuser:
+			return True
+		return False
+
+	def has_module_perms(self, app_label):
+		print("App label : " + app_label)
+		if self.is_superuser:
+			return True
+		return False
+
 	def __str__(self) -> str:
-		return self.username
+		return str(self.name)
 
 
 # class UserSettings(models.Model):

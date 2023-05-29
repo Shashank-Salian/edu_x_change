@@ -15,6 +15,7 @@ type Props = {
 	borderClr?: string;
 	noLbl?: boolean;
 	resize?: "horizontal" | "vertical" | "none" | "both";
+	isValid?: boolean;
 };
 
 const Input = (props: Props) => {
@@ -28,6 +29,7 @@ const Input = (props: Props) => {
 					required={props.required}
 					name={props.name}
 					className={`lite-shadow ${classes.input}`}
+					data-valid={props.value === "" || props.isValid}
 					onInput={props.onInput}
 				/>
 			) : (

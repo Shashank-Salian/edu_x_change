@@ -6,6 +6,14 @@ class ServerException(Exception):
 		self.error_name = "SERVER_ERROR"
 
 
+class WrongMethodException(Exception):
+
+	def __init__(self, message="Wrong method", code="UNKNOWN"):
+		self.message = message
+		self.code = code
+		self.error_name = "WRONG_METHOD"
+
+
 class AlreadyExistException(Exception):
 
 	def __init__(self, message: str, code="UNKNOWN"):
@@ -20,3 +28,11 @@ class ValidationException(Exception):
 		self.message = message
 		self.code = code
 		self.error_name = "VALIDATION_ERROR"
+
+
+class NotAuthorizedException(Exception):
+
+	def __init__(self, message: str, code="UNKNOWN"):
+		self.message = message
+		self.code = code
+		self.error_name = "NOT_AUTHORIZED_ERROR"

@@ -21,6 +21,20 @@
 	width: 100%;
 }
 
+.errorMsg {
+	display: block;
+	min-height: 20px;
+	text-align: center;
+}
+
+.errorMsg[data-mode=error] {
+	color: red;
+}
+
+.errorMsg[data-mode=success] {
+	color: green;
+}
+
 @media screen and (max-width: 500px) {
 	.wrapper {
 		grid-template-columns: auto;

@@ -13,6 +13,11 @@ type Props = {
 	onCloseClick?: JSX.MouseEventHandler<HTMLDivElement>;
 };
 
+type ErrorMsg = {
+	message: string;
+	mode: "success" | "error" | "warn";
+};
+
 const CreateCommunityCard = (props: Props) => {
 	const [iconInpData, setIconInpData] = useState<{ file: File; url: string }>();
 	const [textInpData, setTextInpData] = useState({
@@ -29,12 +34,24 @@ const CreateCommunityCard = (props: Props) => {
 			value: "",
 		},
 	});
+	const [errorMsg, setErrorMsg] = useState<ErrorMsg>({
+		message: "",
+		mode: "warn",
+	});
 
 	const onIconInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
 		const { files } = e.currentTarget;
 
 		if (files && files.length !== 0) {
 			const [file] = files;
+			if (file.size > 1024 * 1024) {
+				setErrorMsg({
+					message: "Image size should be less than 1MB",
+					mode: "error",
+				});
+				return;
+			}
+			setErrorMsg({ message: "", mode: "warn" });
 			setIconInpData({
 				file,
 				url: URL.createObjectURL(file),
@@ -82,12 +99,24 @@ const CreateCommunityCard = (props: Props) => {
 				const rawRes = await fetch("/api/community/create/", {
 					method: "POST",
 					headers: new Headers({
-						"X-CSRFToken": getCookie("csrftoken")!,
+						"X-CSRFToken": getCookie("csrftoken") || "",
 					}),
 					body: formData,
 				});
 				const res = await rawRes.json();
 				console.log(res);
+
+				if (res.error) {
+					setErrorMsg({
+						message: res.message,
+						mode: "error",
+					});
+				} else {
+					setErrorMsg({
+						message: res.message,
+						mode: "success",
+					});
+				}
 			} catch (err) {
 				console.error(err);
 			}
@@ -150,7 +179,10 @@ const CreateCommunityCard = (props: Props) => {
 							resize='vertical'
 						/>
 					</div>
-					<div className={`mt-30 flx-c`}>
+					<span className={classes.errorMsg} data-mode={errorMsg.mode}>
+						{errorMsg.message}
+					</span>
+					<div className={`mt-20 flx-c`}>
 						<button className={`btn blue large shadow`} type='submit'>
 							Create community
 						</button>

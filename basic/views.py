@@ -3,12 +3,12 @@ from django.http import HttpRequest, HttpResponse
 from django.template import loader
 from minify_html_onepass import minify
 from django.middleware.csrf import get_token
+from django.contrib.auth.models import AnonymousUser
 
 static_page_cache = {}
 
 
 def render_and_minify(template, data={}):
-	# data = {"signuppage": True}
 	html = loader.render_to_string(template, data)
 	return minify(html, minify_css=True, minify_js=True)
 
@@ -16,6 +16,7 @@ def render_and_minify(template, data={}):
 def home(req: HttpRequest):
 	res = HttpResponse(render_and_minify("home/index.html"))
 	get_token(req)
+	print("home : " + str(req.user.user_permissions.all()))
 	return res
 
 

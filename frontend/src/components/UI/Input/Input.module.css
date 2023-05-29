@@ -49,6 +49,10 @@
 	border-radius: 8px;
 }
 
+.input[data-valid=false] {
+	border-color: red;
+}
+
 .input[data-resize=none] {
 	resize: none;
 }
