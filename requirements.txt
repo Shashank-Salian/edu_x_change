@@ -1,3 +1,5 @@
-django
-mysqlclient
+Django>=4.2
+django-vite>=2
+mysqlclient>=2
+Pillow>=9
 minify-html-onepass
