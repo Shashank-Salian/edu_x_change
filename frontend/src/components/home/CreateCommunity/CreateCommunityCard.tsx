@@ -3,11 +3,12 @@ import { useState } from "preact/hooks";
 
 import Card from "@/components/Card/Card";
 import Input from "@/components/UI/Input/Input";
+import FileInput from "@/components/UI/Input/FileInput";
+import Button from "@/components/UI/Button/Button";
 
 import classes from "./CreateCommunityCard.module.css";
-import FileInput from "@/components/UI/Input/FileInput";
 
-import { getCookie } from "@/utils/utils";
+import { getCookie, request } from "@/utils/utils";
 
 type Props = {
 	onCloseClick?: JSX.MouseEventHandler<HTMLDivElement>;
@@ -38,6 +39,7 @@ const CreateCommunityCard = (props: Props) => {
 		message: "",
 		mode: "warn",
 	});
+	const [isLoading, setIsLoading] = useState(false);
 
 	const onIconInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
 		const { files } = e.currentTarget;
@@ -82,6 +84,7 @@ const CreateCommunityCard = (props: Props) => {
 	const onSubmit: JSX.GenericEventHandler<HTMLFormElement> = async (e) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
+
 		if (
 			textInpData.commName.value.length > 2 &&
 			textInpData.topic.value.length > 2
@@ -96,15 +99,15 @@ const CreateCommunityCard = (props: Props) => {
 			}
 
 			try {
-				const rawRes = await fetch("/api/community/create/", {
-					method: "POST",
-					headers: new Headers({
-						"X-CSRFToken": getCookie("csrftoken") || "",
-					}),
-					body: formData,
-				});
+				setIsLoading(true);
+				const rawRes = await request(
+					"/api/community/create/",
+					formData,
+					"POST"
+				);
 				const res = await rawRes.json();
 				console.log(res);
+				setIsLoading(false);
 
 				if (res.error) {
 					setErrorMsg({
@@ -118,6 +121,7 @@ const CreateCommunityCard = (props: Props) => {
 					});
 				}
 			} catch (err) {
+				setIsLoading(false);
 				console.error(err);
 			}
 		}
@@ -183,9 +187,9 @@ const CreateCommunityCard = (props: Props) => {
 						{errorMsg.message}
 					</span>
 					<div className={`mt-20 flx-c`}>
-						<button className={`btn blue large shadow`} type='submit'>
+						<Button loading={isLoading} type='submit' size='large'>
 							Create community
-						</button>
+						</Button>
 					</div>
 				</form>
 			</Card>

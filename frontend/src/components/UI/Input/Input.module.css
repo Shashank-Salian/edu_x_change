@@ -36,10 +36,11 @@
 .textArea {
 	max-height: 250px;
 	min-height: 45px;
+	font-size: 1rem;
 }
 
 .txtAreaLbl {
-	top: 8px;
+	top: 10px;
 }
 
 .input {

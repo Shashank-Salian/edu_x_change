@@ -69,7 +69,7 @@ def login_user(req: HttpRequest):
 
 		if au is not None:
 			login(req, au)
-			redirect("/")
+			# redirect("/")
 			resp = success_resp_data("User logged in successfully")
 			return JsonResponse(resp)
 

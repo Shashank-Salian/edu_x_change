@@ -2,15 +2,22 @@ import { useState } from "preact/hooks";
 import ExcWritten from "@/assets/logos/ExcWritten";
 
 import classes from "./LoginForm.module.css";
-import Input from "../UI/Input/Input";
+import Input from "@/components/UI/Input/Input";
+import Button from "@/components/UI/Button/Button";
 
-import { getCookie, isValidEmail, isValidUsername } from "@/utils/utils";
+import {
+	getCookie,
+	isValidEmail,
+	isValidUsername,
+	request,
+} from "@/utils/utils";
 import { TargetedEvent } from "preact/compat";
 
 type Props = {};
 
 const LoginForm = (_props: Props) => {
 	const [isSignupForm, setIsSignupForm] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [signupData, setSignupData] = useState([
 		{
 			id: "signupName",
@@ -119,15 +126,9 @@ const LoginForm = (_props: Props) => {
 		formData.append("password", password);
 
 		try {
-			const rawRes = await fetch("/api/users/signup/", {
-				method: "POST",
-				headers: new Headers({
-					"X-CSRFToken": getCookie("csrftoken")!,
-				}),
-				body: formData,
-			});
-
+			const rawRes = await request("/api/users/signup/", formData, "POST");
 			const res = await rawRes.json();
+
 			console.log(res);
 			if (res.ok) {
 				setMessageData({
@@ -160,14 +161,9 @@ const LoginForm = (_props: Props) => {
 			formData.append("userName", username);
 			formData.append("password", password);
 
-			const rawRes = await fetch("/api/users/login/", {
-				method: "POST",
-				headers: new Headers({
-					"X-CSRFToken": getCookie("csrftoken")!,
-				}),
-				body: formData,
-			});
+			const rawRes = await request("/api/users/login/", formData, "POST");
 			const res = await rawRes.json();
+
 			console.log(res);
 
 			if (res.ok) {
@@ -190,24 +186,28 @@ const LoginForm = (_props: Props) => {
 		}
 	};
 
-	const onSubmit = (e: TargetedEvent<HTMLFormElement, Event>) => {
+	const onSubmit = async (e: TargetedEvent<HTMLFormElement, Event>) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 
 		if (isSignupForm) {
 			if (signupData.every((ele) => ele.isValid())) {
-				signUp(
+				setIsLoading(true);
+				await signUp(
 					signupData[0].value,
 					signupData[1].value,
 					signupData[2].value,
 					signupData[3].value
-				);
+				).catch(() => {});
+				setIsLoading(false);
 				return;
 			}
 		}
 
 		if (signinData.every((ele) => ele.isValid())) {
-			signIn(signinData[0].value, signinData[1].value);
+			setIsLoading(true);
+			await signIn(signinData[0].value, signinData[1].value).catch(() => {});
+			setIsLoading(false);
 			return;
 		}
 
@@ -218,6 +218,7 @@ const LoginForm = (_props: Props) => {
 	};
 
 	const onSwitchFormClick = () => {
+		setMessageData({ message: "", type: "normal" });
 		setIsSignupForm((oldState) => !oldState);
 	};
 
@@ -242,7 +243,7 @@ const LoginForm = (_props: Props) => {
 								id={eleData.id}
 								type={eleData.type}
 								placeholder={eleData.placeholder}
-								name={eleData.id}
+								name={`form-${eleData.id}`}
 								required
 								value={eleData.value}
 								onInput={(e) => onSignupInput(e, i)}
@@ -257,6 +258,7 @@ const LoginForm = (_props: Props) => {
 								<Input
 									key={i}
 									id={eleData.id}
+									name={`form-${eleData.id}`}
 									type={eleData.type}
 									placeholder={eleData.placeholder}
 									value={eleData.value}
@@ -267,9 +269,9 @@ const LoginForm = (_props: Props) => {
 									whiteLbl
 								/>
 							))}
-							<button className={`btn transp mt-10`} type='button'>
+							<Button className={`mt-10`} color='transp' type='button'>
 								Forgot password ?
-							</button>
+							</Button>
 						</>
 					)}
 				</div>
@@ -279,21 +281,25 @@ const LoginForm = (_props: Props) => {
 				>
 					{messageData.message}
 				</p>
-				<button
-					className={`btn orange large shadow mb-30 ${classes.submitBtn}`}
+				<Button
+					className={`mb-30 ${classes.submitBtn}`}
+					size='large'
+					color='orange'
 					type='submit'
+					loading={isLoading}
 				>
 					{isSignupForm ? "Sign up" : "Log in"}
-				</button>
+				</Button>
 				<div className={classes.switchContainer}>
 					{isSignupForm ? "Already have an account ?" : "New here ?"}
-					<button
-						className={`btn transp ${classes.switchBtn}`}
+					<Button
+						className={`${classes.switchBtn}`}
+						color='transp'
 						type='button'
 						onClick={onSwitchFormClick}
 					>
 						{isSignupForm ? "Log In" : "Sign Up"}
-					</button>
+					</Button>
 				</div>
 			</form>
 		</div>

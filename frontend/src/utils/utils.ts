@@ -1,8 +1,7 @@
-function request(path: string, method = "GET", body?: any) {
+function request(path: string, body?: any, method = "GET") {
 	return fetch(path, {
 		method,
 		headers: new Headers({
-			"Content-Type": "application/json",
 			"X-CSRFToken": getCookie("csrftoken") || "",
 		}),
 		body,

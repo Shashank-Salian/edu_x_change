@@ -3,6 +3,10 @@ from users.models import Users
 
 from basic.exceptions import AlreadyExistException, ValidationException
 
+from basic.utils import get_logger, is_valid_image
+
+logger = get_logger(__name__)
+
 
 # Create your models here.
 class Community(models.Model):
@@ -23,18 +27,25 @@ class Community(models.Model):
 	                              null=True,
 	                              on_delete=models.SET_NULL)
 
-	def save(self, *args, **kwargs):
+	def validate_community(self):
 		if self.name is None or len(self.name) < 3 or len(
 		    self.name) > 25 or self.topic is None or len(
 		        self.topic) < 3 or len(self.topic) > 25 or len(
 		            self.description) > 500:
 			raise ValidationException("Some field entered were invalid!",
 			                          "INVALID_FIELD")
+
+		if self.icon_path.name is not None and not is_valid_image(
+		    self.icon_path):
+			raise ValidationException(
+			    "Image should be a valid PNG, JPG and size should be less than 1MB",
+			    "INVALID_IMAGE")
+
 		if self.community_exists(self.name):
 			raise AlreadyExistException(
-			    f"Community with name {self.name} already exists",
+			    f'Community with name "{self.name}" already exists',
 			    "COMMUNITY_NAME_TAKEN")
-		super().save(*args, **kwargs)
+		return True
 
 	def community_exists(self, name):
 		try:

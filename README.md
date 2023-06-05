@@ -1,6 +1,6 @@
 # Edu X Change
 
-Edu X Change is an educational social media platform built using Python, Django, Preact with Typescript in frontend. It allows students to join virtual groups called "communities" based on their interests. Within these communities, students can share study materials such as e-books, PDF notes, images, and videos. They can also create posts with text, embedded images, or links to external applications. Users can ask questions related to the topic, and other members of the community can provide answers. Additionally, users can upvote and downvote posts, questions, and answers to filter out the best content.
+Edu X Change is an educational social media platform built using Python, Django, Preact with Typescript in frontend. It allows students to join virtual groups called "communities" based on their interests. Within these communities, students can share study materials such as e-books, PDF notes, images, and videos. They can also create posts with text, embedded images, or links to external applications. Users can ask questions related to the topic, and other members of the community can provide answers. Additionally, users can up-vote and down-vote posts, questions, and answers to filter out the best content.
 
 ## Features
 
@@ -9,7 +9,7 @@ Edu X Change is an educational social media platform built using Python, Django,
 - Content Sharing: Users can upload and share study materials like e-books, PDF notes, images, and videos within their communities.
 - Post Creation: Users can create text-based posts with embedded images or links to external applications.
 - Question and Answer System: Users can ask questions related to a community's topic, and other members can provide answers.
-- Voting System: Users can upvote or downvote posts, questions, and answers to determine the quality and relevance of the content.
+- Voting System: Users can up-vote or down-vote posts, questions, and answers to determine the quality and relevance of the content.
 
 ## Tech Stack
 
@@ -52,7 +52,7 @@ To get a local copy of the project up and running, follow these steps:
 
 3. Configure the database settings:
 
-   Open the backend/edu_x_change/settings.py file and modify the following section:
+   Install MySQL and run the server. Open the `settings.py` file and modify the following section:
 
    ```python
    DATABASES = {
@@ -87,4 +87,4 @@ To get a local copy of the project up and running, follow these steps:
 
 6. Access the application:
 
-  Open your browser and visit `http://127.0.0.1:8000/` to access the Edu X Change application.
+   Open your browser and visit `http://127.0.0.1:8000/` to access the Edu X Change application.

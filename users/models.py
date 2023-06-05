@@ -1,7 +1,7 @@
 from django.db import models
 from basic.utils import *
 from basic.exceptions import AlreadyExistException, ValidationException
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Permission
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
@@ -21,6 +21,7 @@ class UsersManager(BaseUserManager):
 		user.password = make_password(password, salt=username)
 		user.validate_user()
 		user.save()
+		user.set_basic_perms()
 		return user
 
 	def create_superuser(self, username, password, email, name,
@@ -60,7 +61,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
 		        self.password) and is_valid_username(self.username):
 			if self.user_exists(self.username):
 				raise AlreadyExistException(
-				    f"User with '{self.username}' username already exist",
+				    f'User with "{self.username}" username already exist',
 				    "USERNAME_TAKEN")
 			return True
 		raise ValidationException("Some fields submitted were invalid!",
@@ -73,26 +74,15 @@ class Users(AbstractBaseUser, PermissionsMixin):
 		except Users.DoesNotExist:
 			return False
 
-	def authenticate(self, pwd):
-		if self.check_password(pwd):
-			return self
-		return None
+	def set_basic_perms(self):
+		comm_perms = ['add_community', 'change_community', 'delete_community']
+		post_perms = ['add_posts', 'change_posts', 'delete_posts']
 
-	def has_perm(self, perm):
-		print("permissions asked : " + perm)
-		if self.is_superuser:
-			return True
-		return False
-
-	def has_module_perms(self, app_label):
-		print("App label : " + app_label)
-		if self.is_superuser:
-			return True
-		return False
+		for i in range(3):
+			self.user_permissions.add(
+			    Permission.objects.get(codename=comm_perms[i]))
+			self.user_permissions.add(
+			    Permission.objects.get(codename=post_perms[i]))
 
 	def __str__(self) -> str:
 		return str(self.name)
-
-
-# class UserSettings(models.Model):
-# 	pass

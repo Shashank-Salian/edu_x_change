@@ -1,4 +1,4 @@
-import { ComponentChild, JSX } from "preact";
+import { JSX } from "preact";
 
 import classes from "./Input.module.css";
 
@@ -23,6 +23,7 @@ const Input = (props: Props) => {
 		<div className={`${classes.container} ${props.className || ""}`}>
 			{props.type !== "textarea" ? (
 				<input
+					id={props.id}
 					value={props.value}
 					type={props.type || "text"}
 					placeholder={props.placeholder}
@@ -37,6 +38,7 @@ const Input = (props: Props) => {
 					className={`lite-shadow ${classes.input} ${
 						props.type === "textarea" ? classes.textArea : ""
 					}`}
+					placeholder={props.placeholder}
 					data-resize={props.resize}
 					onInput={props.onInput}
 					name={props.name}

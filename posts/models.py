@@ -6,7 +6,7 @@ from django.db.models import Model, ForeignKey
 class Posts(Model):
 	heading = models.CharField(max_length=100)
 	created_time = models.DateTimeField(auto_now_add=True)
-	body = models.CharField(max_length=10_000)
+	body = models.CharField(max_length=25_000)
 	upvote_count = models.PositiveIntegerField(default=0)
 	downvote_count = models.PositiveIntegerField(default=0)
 	created_user = ForeignKey("users.Users",
@@ -22,8 +22,7 @@ class Posts(Model):
 	                            related_name='posts_downvoted',
 	                            on_delete=models.SET_NULL)
 
-	community: ForeignKey[Model] = ForeignKey('community.Community',
-	                                          on_delete=models.CASCADE)
+	community = ForeignKey('community.Community', on_delete=models.CASCADE)
 
 	def __str__(self) -> str:
 		return self.heading

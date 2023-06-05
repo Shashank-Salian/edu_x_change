@@ -1,7 +1,7 @@
 import { useState } from "preact/hooks";
 
 import Logo from "@/assets/logos/ExcWritten";
-
+import Button from "@/components/UI/Button/Button";
 import classes from "./Nav.module.css";
 import Input from "../UI/Input/Input";
 import usePortal from "@/hooks/usePortal";
@@ -38,12 +38,9 @@ const Nav = (_props: Props) => {
 					/>
 				</div>
 				<div>
-					<button
-						className={`btn blue shadow mr-20`}
-						onClick={toggleCreateCommunityCard}
-					>
+					<Button onClick={toggleCreateCommunityCard}>
 						Create community +
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>

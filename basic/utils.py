@@ -1,6 +1,14 @@
 import re
 
-import mimetypes
+from PIL import Image, UnidentifiedImageError
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def get_logger(name):
+	return logging.getLogger(name)
 
 
 def is_valid_email(email):
@@ -29,15 +37,17 @@ def is_valid_password(password):
 	return len(password) >= 8
 
 
-"""
-Create a dictionary of response data based on the provided message, status, error, and code.
-
-:param message: string containing the message to be included in the response
-:param ok: boolean indicating if the response is successful or not, defaults to True
-:param error: boolean indicating if the response contains an error, defaults to False
-:param code: string containing the status code of the response, defaults to "OK"
-:return: a dictionary containing the response data
-"""
+def is_valid_image(img):
+	if img.size > (1024 * 1024):
+		return False
+	try:
+		fmt = Image.open(img.file).format
+		if fmt in ["PNG", "JPEG", "JPG"]:
+			logger.debug("Valid Image")
+			return True
+	except Exception as e:
+		logger.error(e)
+	return False
 
 
 def error_resp_data(err: Exception):
