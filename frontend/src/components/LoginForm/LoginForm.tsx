@@ -5,12 +5,7 @@ import classes from "./LoginForm.module.css";
 import Input from "@/components/UI/Input/Input";
 import Button from "@/components/UI/Button/Button";
 
-import {
-	getCookie,
-	isValidEmail,
-	isValidUsername,
-	request,
-} from "@/utils/utils";
+import { isValidEmail, isValidUsername, request } from "@/utils/utils";
 import { TargetedEvent } from "preact/compat";
 
 type Props = {};

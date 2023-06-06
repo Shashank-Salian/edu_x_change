@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.template import loader
 from minify_html_onepass import minify
@@ -22,7 +22,13 @@ def home(req: HttpRequest):
 
 def login(req: HttpRequest):
 	get_token(req)
+	# if req.user.is_active:
+	# 	return redirect("/")
 	return HttpResponse(render_and_minify("login/index.html"))
+
+
+def post(req: HttpRequest):
+	return HttpResponse(render_and_minify("post/index.html"))
 
 
 def favicon(req: HttpRequest):

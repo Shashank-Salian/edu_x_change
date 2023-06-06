@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@toast-ui/editor": "^3.2.2",
     "preact": "^10.13.1"
   },
   "devDependencies": {

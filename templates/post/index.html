@@ -1,0 +1,11 @@
+{% extends 'basic.html' %} {% load static %} 
+{% load django_vite %}
+{% block head %}
+<title>Post</title>
+{% endblock head %}
+{% block body %}
+<div id="root"></div>
+{% endblock body %}
+{% block scripts %}
+	{% vite_asset 'pages/post/post.tsx' %}
+{% endblock scripts %}
