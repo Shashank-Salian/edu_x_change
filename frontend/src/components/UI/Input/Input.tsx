@@ -16,6 +16,8 @@ type Props = {
 	noLbl?: boolean;
 	resize?: "horizontal" | "vertical" | "none" | "both";
 	isValid?: boolean;
+	max?: number;
+	maxLength?: number;
 };
 
 const Input = (props: Props) => {
@@ -32,6 +34,8 @@ const Input = (props: Props) => {
 					className={`lite-shadow ${classes.input}`}
 					data-valid={props.value === "" || props.isValid}
 					onInput={props.onInput}
+					max={props.max}
+					maxLength={props.maxLength}
 				/>
 			) : (
 				<textarea

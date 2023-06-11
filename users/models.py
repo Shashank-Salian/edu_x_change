@@ -19,7 +19,6 @@ class UsersManager(BaseUserManager):
 		                         name=name,
 		                         **extra_fields)
 		user.password = make_password(password, salt=username)
-		user.validate_user()
 		user.save()
 		user.set_basic_perms()
 		return user
@@ -32,8 +31,10 @@ class UsersManager(BaseUserManager):
 		if extra_fields.get('is_staff') is not True:
 			raise ValueError('Superuser must have is_staff=True.')
 
-		return self.create_user(username, password, email, name,
-		                        **extra_fields)
+		su_user = self.create_user(username, password, email, name,
+		                           **extra_fields)
+
+		return su_user
 
 	def get_by_natural_key(self, username):
 		return self.get(username=username)
@@ -54,6 +55,10 @@ class Users(AbstractBaseUser, PermissionsMixin):
 	REQUIRED_FIELDS = ['password', 'email', 'name']
 
 	objects = UsersManager()
+
+	def save(self, *args, **kwargs):
+		self.validate_user()
+		super().save(*args, **kwargs)
 
 	def validate_user(self):
 		if is_valid_name(self.name) and is_valid_email(

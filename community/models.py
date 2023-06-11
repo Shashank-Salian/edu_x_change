@@ -17,7 +17,7 @@ class Community(models.Model):
 	    related_name='communities_joined',
 	)
 	topic = models.CharField(max_length=25, default=None)
-	description = models.CharField(max_length=500, default=None)
+	description = models.CharField(max_length=500, default=None, null=True)
 	icon_path = models.ImageField(upload_to='userassets/community_icons/',
 	                              default=None,
 	                              null=True)

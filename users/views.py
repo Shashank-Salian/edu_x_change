@@ -17,10 +17,10 @@ def signup_user(req: HttpRequest):
 		resp = error_resp_data(WrongMethodException())
 		return JsonResponse(resp, status=400)
 
-	name = req.POST.get("fullName", None)
-	email = req.POST.get("email", None)
-	username = req.POST.get("userName", None)
-	password = req.POST.get("password", None)
+	name = req.POST.get("fullName")
+	email = req.POST.get("email")
+	username = req.POST.get("userName")
+	password = req.POST.get("password")
 
 	print(name, email, username, password)
 
@@ -91,14 +91,16 @@ def login_user(req: HttpRequest):
 
 def get_user_info(req: HttpRequest):
 	if not req.user.is_active:
-		return JsonResponse(
-		    error_resp_data(NotAuthorizedException("Login to get info")))
+		return JsonResponse(error_resp_data(
+		    NotAuthorizedException("Login to get info")),
+		                    status=401)
 
 	print(req.user)
 	u = req.user
 	if not req.user.is_active:
-		return JsonResponse(
-		    error_resp_data(NotAuthorizedException("Login to get info")))
+		return JsonResponse(error_resp_data(
+		    NotAuthorizedException("Login to get info")),
+		                    status=401)
 	return JsonResponse({
 	    "fullName": u.name,
 	    "email": u.email,

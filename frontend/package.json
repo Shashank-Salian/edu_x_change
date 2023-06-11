@@ -10,11 +10,14 @@
   },
   "dependencies": {
     "@toast-ui/editor": "^3.2.2",
-    "preact": "^10.13.1"
+    "@toast-ui/editor-plugin-code-syntax-highlight": "^3.1.0",
+    "preact": "^10.13.1",
+    "prismjs": "^1.29.0"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.5.0",
     "@types/node": "^18.16.0",
+    "@types/prismjs": "^1.26.0",
     "typescript": "^5.0.2",
     "vite": "^4.3.0"
   }

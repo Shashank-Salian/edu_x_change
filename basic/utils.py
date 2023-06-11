@@ -62,7 +62,7 @@ def error_resp_data(err: Exception):
 	return resp
 
 
-def success_resp_data(message: str, code="OK"):
+def success_resp_data(message: str, code="OK", data=None):
 	resp = {
 	    "error": False,
 	    "ok": True,
@@ -71,22 +71,15 @@ def success_resp_data(message: str, code="OK"):
 	    "errorName": None
 	}
 
+	if data is not None:
+		resp["data"] = data
+
 	return resp
 
 
-def is_image(file):
-	head = file.read(256)
+def format_date(dt):
+	return dt.strftime("%d-%m-%Y")
 
-	# Check if the file starts with a JPEG SOI marker.
-	if head.startswith(b'\xFF\xD8'):
-		return True
 
-	# Check if the file starts with a PNG 8-bit TGA header.
-	if head.startswith(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'):
-		return True
-
-	if head.startswith(b'\x89PNG\r\n\x1A\n'):
-		return True
-
-	# The file is not an image file.
-	return False
+def format_com_icon_url(name):
+	return f"/api/community/icon/{name}"

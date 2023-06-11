@@ -30,4 +30,13 @@ function getCookie(cName: string) {
 	return null;
 }
 
-export { request, isValidEmail, isValidUsername, getCookie };
+function debounce(cb: (...args: any[]) => void, delay = 1000) {
+	let timeout: number;
+
+	return (...args: any[]) => {
+		window.clearTimeout(timeout);
+		timeout = window.setTimeout(() => cb(...args), delay);
+	};
+}
+
+export { request, isValidEmail, isValidUsername, getCookie, debounce };

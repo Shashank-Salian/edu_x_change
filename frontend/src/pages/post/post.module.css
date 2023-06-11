@@ -2,3 +2,22 @@
 	min-height: 100vh;
 	background-color: var(--creme);
 }
+
+.inpContainer {
+	display: grid;
+	grid-template-columns: minmax(auto, max-content) minmax(280px, 1fr);
+	gap: 20px;
+	align-items: center;
+}
+
+.btnContainer {
+	display: flex;
+	justify-content: end;
+}
+
+@media screen and (max-width: 620px) {
+	.inpContainer {
+		grid-template-columns: auto;
+		gap: 10px;
+	}
+}

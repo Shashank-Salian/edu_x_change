@@ -36,3 +36,11 @@ class NotAuthorizedException(Exception):
 		self.message = message
 		self.code = code
 		self.error_name = "NOT_AUTHORIZED_ERROR"
+
+
+class DoesNotExistException(Exception):
+
+	def __init__(self, message: str, code="UNKNOWN"):
+		self.message = message
+		self.code = code
+		self.error_name = "DOES_NOT_EXIST_ERROR"

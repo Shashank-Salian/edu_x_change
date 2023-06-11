@@ -1,10 +1,7 @@
 from django.urls import path
-from django.http import HttpResponse, HttpRequest
+from . import views
 
-
-def hello(req: HttpRequest):
-
-	return HttpResponse("Welcome to Posts app")
-
-
-urlpatterns = [path('create/', hello)]
+urlpatterns = [
+    path('create/', views.create),
+    path('draft/', views.draft, name="draft"),
+]
