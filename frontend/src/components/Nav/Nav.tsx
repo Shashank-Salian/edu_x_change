@@ -38,9 +38,15 @@ const Nav = (_props: Props) => {
 					/>
 				</div>
 				<div>
-					<Button onClick={toggleCreateCommunityCard}>
-						Create community +
+					<Button onClick={toggleCreateCommunityCard} className='mr-20'>
+						Community +
 					</Button>
+					<a href='/post/'>
+						<Button className='mr-20'>Post +</Button>
+					</a>
+					<a href='/login/'>
+						<Button>Login</Button>
+					</a>
 				</div>
 			</div>
 		</div>

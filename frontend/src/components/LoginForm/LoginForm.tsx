@@ -100,6 +100,7 @@ const LoginForm = (_props: Props) => {
 			newData[i].value = e.currentTarget.value;
 			return newData;
 		});
+		console.log(signinData[i].value)
 	};
 
 	/**

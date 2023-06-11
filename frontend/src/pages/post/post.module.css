@@ -12,7 +12,15 @@
 
 .btnContainer {
 	display: flex;
-	justify-content: end;
+	justify-content: space-between;
+}
+
+.message[data-type="error"] {
+	color: red;
+}
+
+.message[data-type="success"] {
+	color: green;
 }
 
 @media screen and (max-width: 620px) {

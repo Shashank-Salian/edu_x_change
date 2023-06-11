@@ -10,9 +10,11 @@ import classes from "./MarkdownEditor.module.css";
 
 type Props = {
 	className?: string;
+	initialValue?: string;
 	onEditorInitialized?: (editor: any) => void;
 	onInput?: (editorType: "wysiwyg" | "markdown") => void;
-	onImageInput?: (blob: Blob | File, callback: Function) => undefined;
+	onImageInput?: (blob: Blob | File, callback: Function) => void;
+	onCaretChange?: (editorType: "wysiwyg" | "markdown") => void;
 };
 
 const MarkdownEditor = (props: Props) => {
@@ -24,26 +26,25 @@ const MarkdownEditor = (props: Props) => {
 			height: "100%",
 			initialEditType: "wysiwyg",
 			placeholder: "Type your post...",
-			initialValue: `something`,
+			initialValue: props.initialValue || ``,
 			plugins: [[codeSyntaxHighlight, { highlighter: Prism }]],
-			hooks: {
-				addImageBlobHook(blob: Blob | File, callback: any) {
-					if (props.onImageInput) {
-						props.onImageInput(blob, callback);
-						return;
-					}
-					console.log(blob);
-					callback("https://http.cat/200", "Cat");
-				},
-			},
 			events: {
 				change: (e: any) => {
 					if (props.onInput) props.onInput(e);
 				},
+				caretChange: (e: any) => {
+					if (props.onCaretChange) props.onCaretChange(e);
+				},
 			},
 		});
 
-		// editor.addHook()
+		if (props.onImageInput) {
+			editor.addHook("addImageBlobHook", (blob: Blob | File, callback: any) => {
+				if (props.onImageInput) props.onImageInput(blob, callback);
+				// console.log(blob);
+				// callback("https://http.cat/408", "Cat");
+			});
+		}
 
 		if (props.onEditorInitialized) props.onEditorInitialized(editor);
 

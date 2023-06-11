@@ -9,7 +9,9 @@ import Input from "@/components/UI/Input/Input";
 import Button from "@/components/UI/Button/Button";
 import { debounce, request } from "@/utils/utils";
 
-type SelectInput = JSX.GenericEventHandler<HTMLSelectElement>;
+type SelectInput = JSX.GenericEventHandler<
+	HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement
+>;
 type MessageData = { message: string; type: "error" | "success" | "normal" };
 
 const Post = () => {
@@ -21,6 +23,10 @@ const Post = () => {
 
 	const draftPost = async (formData: FormData) => {
 		try {
+			setMessageData({
+				message: "Drafting...",
+				type: "normal",
+			});
 			const res = await request("/api/posts/draft/", formData, "POST");
 			const data = await res.json();
 
@@ -28,7 +34,13 @@ const Post = () => {
 
 			if (data.ok) {
 				setMessageData({ message: "Drafted", type: "success" });
+				return;
 			}
+
+			setMessageData({
+				message: "Couldn't save, check if the post is valid",
+				type: "error",
+			});
 		} catch (err) {
 			console.log(err);
 			setMessageData({
@@ -39,41 +51,32 @@ const Post = () => {
 	};
 
 	const titleDebounceRef = useRef(
-		debounce(async (t, cs) => {
-			console.log(t, cs);
-
-			const formData = new FormData();
-			if (t) formData.append("title", t);
-			if (cs) formData.append("community", cs);
-
+		debounce(async (formData: FormData) => {
 			draftPost(formData);
 		}, 2000)
 	);
 
 	const markdownDebounceRef = useRef(
 		debounce((md) => {
+			console.log(md === "");
 			const formData = new FormData();
 
-			if (md) {
+			if (md !== undefined && md !== null) {
 				formData.append("body", md);
 				draftPost(formData);
 			}
 		}, 2000)
 	);
 
-	const isFirstRenderRef = useRef(true);
+	// const isFirstRenderRef = useRef(true);
 
-	const onMarkdownInput = () => {
-		markdownDebounceRef.current(editor.getMarkdown());
-	};
-
-	useEffect(() => {
-		if (isFirstRenderRef.current) {
-			isFirstRenderRef.current = false;
-			return;
-		}
-		titleDebounceRef.current(title, communitySelected);
-	}, [title, communitySelected]);
+	// useEffect(() => {
+	// 	if (isFirstRenderRef.current) {
+	// 		isFirstRenderRef.current = false;
+	// 		return;
+	// 	}
+	// 	titleDebounceRef.current(title, communitySelected);
+	// }, [title, communitySelected]);
 
 	useEffect(() => {
 		const getCommunities = async () => {
@@ -95,8 +98,63 @@ const Post = () => {
 			);
 		};
 
+		const getDraftedPost = async () => {
+			const res = await request("/api/posts/draft/");
+			const data = await res.json();
+
+			console.log(data);
+
+			if (data.ok) {
+				if (data.data.title) setTitle(data.data.title);
+				if (data.data.communityName)
+					setCommunitySelected(data.data.communityName);
+				if (data.data.body) editor.setMarkdown(data.data.body);
+			}
+		};
+
 		getCommunities();
+		getDraftedPost();
 	}, []);
+
+	const onCommInput: SelectInput = (e) => {
+		setCommunitySelected(() => {
+			const newTitle = e.currentTarget.value;
+			const formData = new FormData();
+			formData.append("community", newTitle);
+			titleDebounceRef.current(formData);
+			return newTitle;
+		});
+	};
+
+	const onTitleInput: SelectInput = (e) => {
+		setTitle(() => {
+			const newTitle = e.currentTarget.value;
+			const formData = new FormData();
+			formData.append("title", newTitle);
+			titleDebounceRef.current(formData);
+			return newTitle;
+		});
+	};
+
+	const onMarkdownInput = () => {
+		console.log("something happened");
+		markdownDebounceRef.current(editor.getMarkdown());
+	};
+
+	const onImageInput = (blob: Blob | File, cb: Function) => {
+		const sendImg = async () => {
+			const formData = new FormData();
+			formData.append("image", blob);
+
+			const res = await request("/api/posts/image/", formData, "POST");
+			const data = await res.json();
+			if (data.ok) {
+				cb(`${data.data}`, "");
+			}
+		};
+
+		sendImg();
+	};
 
 	return (
 		<div className={classes.container}>
@@ -107,7 +165,8 @@ const Post = () => {
 					<span className={`mr-30`}>Choose community :</span>
 					<Select
 						options={communities}
-						onInput={(e) => setCommunitySelected(e.currentTarget.value)}
+						value={communitySelected}
+						onInput={onCommInput}
 					/>
 
 					<span>Choose title :</span>
@@ -115,7 +174,7 @@ const Post = () => {
 						value={title}
 						maxLength={100}
 						placeholder='Enter title for your post'
-						onInput={(e) => setTitle(e.currentTarget.value)}
+						onInput={onTitleInput}
 					/>
 				</div>
 
@@ -127,10 +186,13 @@ const Post = () => {
 							editor = ed;
 						}}
 						onInput={onMarkdownInput}
+						onImageInput={onImageInput}
 					/>
 				</div>
 				<div className={`mt-30 ${classes.btnContainer}`}>
-					<span data-type={messageData?.type}>{messageData?.message}</span>
+					<span data-type={messageData?.type} className={classes.message}>
+						{messageData?.message}
+					</span>
 					<Button>Submit</Button>
 				</div>
 			</main>

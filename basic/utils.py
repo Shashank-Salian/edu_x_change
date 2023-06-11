@@ -37,12 +37,15 @@ def is_valid_password(password):
 	return len(password) >= 8
 
 
-def is_valid_image(img):
-	if img.size > (1024 * 1024):
+def is_valid_image(img, no_size=False):
+	if img is None:
 		return False
+	if not no_size and img.size > (1024 * 1024):
+		return False
+
 	try:
 		fmt = Image.open(img.file).format
-		if fmt in ["PNG", "JPEG", "JPG"]:
+		if fmt in ["PNG", "JPEG", "JPG", "WEBP"]:
 			logger.debug("Valid Image")
 			return True
 	except Exception as e:
@@ -81,5 +84,13 @@ def format_date(dt):
 	return dt.strftime("%d-%m-%Y")
 
 
+def format_time(dt):
+	return dt.strftime("%H:%M")
+
+
 def format_com_icon_url(name):
 	return f"/api/community/icon/{name}"
+
+
+def format_post_imgs(name):
+	return f"/api/posts/image/{name}"

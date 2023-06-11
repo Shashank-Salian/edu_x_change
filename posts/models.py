@@ -2,8 +2,14 @@ from django.db import models
 from django.db.models import Model, ForeignKey
 from basic.exceptions import ValidationException
 
-
 # Create your models here.
+
+
+class PostsImagesStore(Model):
+	image = models.ImageField(upload_to="userassets/posts_images/")
+	image_name = models.CharField(max_length=100, default=None, null=True)
+
+
 class Posts(Model):
 	title = models.CharField(max_length=100, null=True, default=None)
 	created_time = models.DateTimeField(auto_now_add=True)
@@ -14,6 +20,7 @@ class Posts(Model):
 	                          null=True,
 	                          related_name='posts_created',
 	                          on_delete=models.SET_NULL)
+	images = models.ManyToManyField(PostsImagesStore, related_name='post')
 	upvotes_user = ForeignKey("users.Users",
 	                          null=True,
 	                          related_name='posts_upvoted',
@@ -36,9 +43,8 @@ class Posts(Model):
 			                          code="NOT_LOGGED_IN")
 		if self.is_drafted:
 			if (self.title is not None and
-			    (len(self.title) < 3 or len(self.title) > 100)) or (
-			        self.body is not None and
-			        (len(self.body) < 5 or len(self.body) > 12_000)):
+			    (len(self.title) > 100)) or (self.body is not None and
+			                                 (len(self.body) > 12_000)):
 				raise ValidationException(
 				    "Title and body must be at least 3 characters long",
 				    code="INVALID_POST")
