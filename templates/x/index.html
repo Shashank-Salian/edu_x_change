@@ -1,0 +1,28 @@
+{% extends 'basic.html' %} {% load static %} 
+{% load django_vite %}
+{% block head %}
+<title>{% if comm_data %} {{ comm_data.name }} {% else %}Not found{% endif %}</title>
+{% endblock head %}
+{% block body %}
+<div id="root"></div>
+{% endblock body %}
+{% block scripts %}
+	<script>
+		{% if comm_data %}
+		const __communityData = {
+			'id': {{ comm_data.id }},
+		    'name': `{{ comm_data.name }}`,
+		    'topic': `{{ comm_data.topic }}`,
+		    'description': `{{ comm_data.description }}`,
+		    'moderator': `{{ comm_data.moderator }}`,
+		    'createdTime': `{{ comm_data.createdDate }}`,
+		    'iconPath': `{{ comm_data.iconPath }}`,
+			'participantsCount': {{ comm_data.participantsCount }},
+			'userJoined': {% if comm_data.userJoined %}true{% else %}false{% endif %}
+		}
+		{% endif %}
+	</script>
+
+
+	{% vite_asset 'pages/x/x.tsx' %}
+{% endblock scripts %}

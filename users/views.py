@@ -83,7 +83,8 @@ def login_user(req: HttpRequest):
 		    NotAuthorizedException(
 		        f"User with username '{username}' does not exist"))
 		return JsonResponse(resp, status=401)
-	except:
+	except Exception as e:
+		logger.error(e)
 		resp = error_resp_data(
 		    ServerException("Something went wrong. Please try again later."))
 		return JsonResponse(resp, status=500)

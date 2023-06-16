@@ -19,21 +19,37 @@ const Post = () => {
 	const [communitySelected, setCommunitySelected] = useState<string>();
 	const [communities, setCommunities] = useState([]);
 	const [messageData, setMessageData] = useState<MessageData>();
-	let editor: any;
 
-	const draftPost = async (formData: FormData) => {
+	const editor = useRef<any>();
+
+	const draftPost = async (formData: FormData, is_submit = false) => {
 		try {
 			setMessageData({
-				message: "Drafting...",
+				message: is_submit ? "Saving..." : "Drafting...",
 				type: "normal",
 			});
-			const res = await request("/api/posts/draft/", formData, "POST");
+			const res = await request(
+				`/api/posts/${is_submit ? "save" : "draft"}/`,
+				formData,
+				"POST"
+			);
 			const data = await res.json();
 
 			console.log(data);
 
 			if (data.ok) {
-				setMessageData({ message: "Drafted", type: "success" });
+				setMessageData({
+					message: is_submit ? "Saved" : "Drafted",
+					type: "success",
+				});
+
+				if (is_submit) {
+					setTitle("");
+					setCommunitySelected("");
+					editor.current.setMarkdown("");
+
+					window.location.pathname = "/";
+				}
 				return;
 			}
 
@@ -68,16 +84,6 @@ const Post = () => {
 		}, 2000)
 	);
 
-	// const isFirstRenderRef = useRef(true);
-
-	// useEffect(() => {
-	// 	if (isFirstRenderRef.current) {
-	// 		isFirstRenderRef.current = false;
-	// 		return;
-	// 	}
-	// 	titleDebounceRef.current(title, communitySelected);
-	// }, [title, communitySelected]);
-
 	useEffect(() => {
 		const getCommunities = async () => {
 			const res = await request("/api/community/mycommunities/");
@@ -108,7 +114,7 @@ const Post = () => {
 				if (data.data.title) setTitle(data.data.title);
 				if (data.data.communityName)
 					setCommunitySelected(data.data.communityName);
-				if (data.data.body) editor.setMarkdown(data.data.body);
+				if (data.data.body) editor.current?.setMarkdown(data.data.body);
 			}
 		};
 
@@ -138,7 +144,7 @@ const Post = () => {
 
 	const onMarkdownInput = () => {
 		console.log("something happened");
-		markdownDebounceRef.current(editor.getMarkdown());
+		markdownDebounceRef.current(editor.current?.getMarkdown());
 	};
 
 	const onImageInput = (blob: Blob | File, cb: Function) => {
@@ -151,9 +157,38 @@ const Post = () => {
 			if (data.ok) {
 				cb(`${data.data}`, "");
 			}
+
+			if (data.error) {
+				setMessageData({
+					message: data.message,
+					type: "error",
+				});
+			}
 		};
 
 		sendImg();
+	};
+
+	const onSubmit = async () => {
+		const formData = new FormData();
+		console.log(title, communitySelected, editor);
+		if (
+			title.length < 3 ||
+			title.length > 100 ||
+			communitySelected === undefined
+		) {
+			setMessageData({
+				message: "Title and community are required and must be valid",
+				type: "error",
+			});
+			return;
+		}
+
+		formData.append("title", title);
+		formData.append("body", editor.current?.getMarkdown());
+		formData.append("community", communitySelected);
+
+		draftPost(formData, true);
 	};
 
 	return (
@@ -183,7 +218,7 @@ const Post = () => {
 					<MarkdownEditor
 						className='mt-20'
 						onEditorInitialized={(ed) => {
-							editor = ed;
+							editor.current = ed;
 						}}
 						onInput={onMarkdownInput}
 						onImageInput={onImageInput}
@@ -193,7 +228,7 @@ const Post = () => {
 					<span data-type={messageData?.type} className={classes.message}>
 						{messageData?.message}
 					</span>
-					<Button>Submit</Button>
+					<Button onClick={onSubmit}>Submit</Button>
 				</div>
 			</main>
 		</div>

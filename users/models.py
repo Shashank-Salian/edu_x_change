@@ -18,6 +18,10 @@ class UsersManager(BaseUserManager):
 		                         email=email,
 		                         name=name,
 		                         **extra_fields)
+		if user.user_exists(self.username):
+			raise AlreadyExistException(
+			    f'User with "{self.username}" username already exist',
+			    "USERNAME_TAKEN")
 		user.password = make_password(password, salt=username)
 		user.save()
 		user.set_basic_perms()
@@ -64,10 +68,6 @@ class Users(AbstractBaseUser, PermissionsMixin):
 		if is_valid_name(self.name) and is_valid_email(
 		    self.email) and is_valid_password(
 		        self.password) and is_valid_username(self.username):
-			if self.user_exists(self.username):
-				raise AlreadyExistException(
-				    f'User with "{self.username}" username already exist',
-				    "USERNAME_TAKEN")
 			return True
 		raise ValidationException("Some fields submitted were invalid!",
 		                          "INVALID_FIELD")

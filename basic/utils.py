@@ -2,6 +2,9 @@ import re
 
 from PIL import Image, UnidentifiedImageError
 
+from django.template import loader
+from minify_html_onepass import minify
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,6 +12,11 @@ logger = logging.getLogger(__name__)
 
 def get_logger(name):
 	return logging.getLogger(name)
+
+
+def render_and_minify(template, data={}):
+	html = loader.render_to_string(template, data)
+	return minify(html, minify_css=True, minify_js=True)
 
 
 def is_valid_email(email):

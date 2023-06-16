@@ -12,6 +12,12 @@ urlpatterns = [
     path('api/community/', include('community.urls')),
     path('api/posts/', include('posts.urls')),
 
+    # Community pages
+    path('x/', include('community.urls')),
+
     # Favicon
     path('favicon.ico', views.favicon),
+
+    # 404
+    path('404/', views.not_found),
 ]

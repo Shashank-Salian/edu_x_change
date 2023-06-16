@@ -38,6 +38,10 @@ const HomePage = () => {
 					<p>{userInfo.isActive}</p>
 				</>
 			)}
+			{/* {communityData.name}
+			<br />
+			{communityData &&
+				communityData.participants.map((e: any) => <span>{e}</span>)} */}
 		</div>
 	);
 };

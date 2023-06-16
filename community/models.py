@@ -2,7 +2,6 @@ from django.db import models
 from users.models import Users
 
 from basic.exceptions import AlreadyExistException, ValidationException
-
 from basic.utils import get_logger, is_valid_image
 
 logger = get_logger(__name__)
@@ -22,7 +21,7 @@ class Community(models.Model):
 	                              default=None,
 	                              null=True)
 
-	moderator = models.ForeignKey("users.Users",
+	moderator = models.ForeignKey(Users,
 	                              related_name='moderator_of',
 	                              null=True,
 	                              on_delete=models.SET_NULL)
@@ -53,6 +52,14 @@ class Community(models.Model):
 			return True
 		except Community.DoesNotExist:
 			return False
+
+	def user_exists(self, username):
+		try:
+			self.participants.get(username=username)
+			return True
+		except Users.DoesNotExist:
+			return False
+		return False
 
 	def __str__(self) -> str:
 		return self.name

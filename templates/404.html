@@ -1,0 +1,11 @@
+{% extends 'basic.html' %} {% load static %} 
+{% load django_vite %}
+{% block head %}
+<title>{{ comm_name }}</title>
+{% endblock head %}
+{% block body %}
+<div id="root"></div>
+{% endblock body %}
+{% block scripts %}
+	{% vite_asset 'pages/404/notfound.tsx' %}
+{% endblock scripts %}

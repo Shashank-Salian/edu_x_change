@@ -1,16 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
-from django.template import loader
-from minify_html_onepass import minify
 from django.middleware.csrf import get_token
 from django.contrib.auth.models import AnonymousUser
 
+from .utils import render_and_minify
+
 static_page_cache = {}
-
-
-def render_and_minify(template, data={}):
-	html = loader.render_to_string(template, data)
-	return minify(html, minify_css=True, minify_js=True)
 
 
 def home(req: HttpRequest):
@@ -29,6 +24,10 @@ def login(req: HttpRequest):
 
 def post(req: HttpRequest):
 	return HttpResponse(render_and_minify("post/index.html"))
+
+
+def not_found(req: HttpRequest):
+	return HttpResponse(render_and_minify("404.html"))
 
 
 def favicon(req: HttpRequest):
