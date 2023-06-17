@@ -40,6 +40,88 @@ def create_post_and_respond(user,
 	return JsonResponse(resp, status=500)
 
 
+def recent(req: HttpRequest):
+	if not req.user.is_active:
+		resp = error_resp_data(
+		    NotAuthorizedException("Login to see recent posts"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		raw_posts = Posts.objects.filter(
+		    community__participants=req.user,
+		    is_drafted=False).order_by('created_time').reverse()
+		posts = []
+
+		for p in raw_posts:
+			posts.append(get_post_data(p, req.user))
+		resp = success_resp_data("Posts retrieved successfully", data=posts)
+		return JsonResponse(resp)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def upvote(req: HttpRequest, p_id):
+	if not req.user.is_active:
+		resp = error_resp_data(
+		    NotAuthorizedException("Login to upvote a post"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		p = Posts.objects.get(id=p_id)
+
+		if p.upvotes_users.filter(username=req.user.username).exists():
+			p.upvotes_users.remove(req.user)
+			resp = success_resp_data("Removed upvote successfully",
+			                         data=get_post_data(p, req.user))
+			return JsonResponse(resp)
+
+		p.downvotes_users.remove(req.user)
+		p.upvotes_users.add(req.user)
+		resp = success_resp_data("Post upvoted successfully",
+		                         data=get_post_data(p, req.user))
+		return JsonResponse(resp)
+	except Posts.DoesNotExist:
+		resp = error_resp_data(DoesNotExistException("Post does not exist"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def downvote(req: HttpRequest, p_id):
+	if not req.user.is_active:
+		resp = error_resp_data(
+		    NotAuthorizedException("Login to downvote a post"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		p = Posts.objects.get(id=p_id)
+
+		if p.downvotes_users.filter(username=req.user.username).exists():
+			p.downvotes_users.remove(req.user)
+
+			resp = success_resp_data("Removed downvote successfully",
+			                         data=get_post_data(p, req.user))
+			return JsonResponse(resp)
+
+		p.downvotes_users.add(req.user)
+		p.upvotes_users.remove(req.user)
+
+		resp = success_resp_data("Post upvoted successfully",
+		                         data=get_post_data(p, req.user))
+		return JsonResponse(resp)
+	except Posts.DoesNotExist:
+		resp = error_resp_data(DoesNotExistException("Post does not exist"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
 def save(req: HttpRequest):
 	if not req.user.is_active or not req.user.has_perm('posts.add_posts'):
 		resp = error_resp_data(
@@ -115,12 +197,12 @@ class Draft(View):
 			    posts.community.name if posts.community else None
 			}
 			resp = success_resp_data("Successfully retrieved", data=posts_info)
-			return JsonResponse(resp, status=200)
+			return JsonResponse(resp)
 		except Posts.DoesNotExist as e:
 			resp = error_resp_data(
 			    DoesNotExistException("No drafted post, create new post",
 			                          "NO_DRAFTED_POST"))
-			return JsonResponse(resp, status=204)
+			return JsonResponse(resp, status=200)
 		except Exception as e:
 			logger.error(e)
 			resp = error_resp_data(ServerException())

@@ -14,6 +14,35 @@ def get_logger(name):
 	return logging.getLogger(name)
 
 
+def get_user_data(user):
+	return {
+	    'id': user.id,
+	    'name': user.name,
+	    'username': user.username,
+	    'createdDate': format_date(user.created_time),
+	    'email': user.email,
+	    'is_active': user.is_active,
+	    'is_staff': user.is_staff,
+	    'is_superuser': user.is_superuser,
+	}
+
+
+def get_post_data(post, user):
+	return {
+	    'id': post.id,
+	    'title': post.title,
+	    'body': post.body,
+	    'community': post.community.name,
+	    'createdUser': post.created_user.username,
+	    'upvoteCount': post.upvotes_users.count(),
+	    'downvoteCount': post.downvotes_users.count(),
+	    'createdDate': format_date(post.created_time),
+	    'upvoted': post.upvotes_users.filter(username=user.username).exists(),
+	    'downvoted':
+	    post.downvotes_users.filter(username=user.username).exists(),
+	}
+
+
 def render_and_minify(template, data={}):
 	html = loader.render_to_string(template, data)
 	return minify(html, minify_css=True, minify_js=True)
@@ -43,6 +72,27 @@ def is_valid_password(password):
 	if password is None:
 		return False
 	return len(password) >= 8
+
+
+def is_valid_comm_name(name):
+	if name is None:
+		return False
+	pattern = r"^\S{3,25}$"
+	return re.match(pattern, name) is not None
+
+
+def is_valid_post_title(title):
+	if title is None:
+		return False
+	pattern = r"^(?=.*\S)[\s\S]{3,101}$"
+	return re.match(pattern, title) is not None
+
+
+def is_valid_post_body(body):
+	if body is None:
+		return False
+	pattern = r"^(?=.*\S)[\s\S]{3,12000}$"
+	return re.match(pattern, body) is not None
 
 
 def is_valid_image(img, no_size=False):

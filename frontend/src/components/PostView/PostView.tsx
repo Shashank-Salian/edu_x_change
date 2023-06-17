@@ -1,36 +1,58 @@
-import { useEffect, useState } from "preact/hooks";
+import { PostData } from "@/utils/types";
 import MarkdownViewer from "../MarkdownEditor/MarkdownViewer";
+
+import classes from "./PostView.module.css";
+import { useState } from "preact/hooks";
 import { request } from "@/utils/utils";
 
 type Props = {
-	communityName?: string;
+	postData: PostData;
+	communityName: string;
+	communityIcon: string;
 };
 
-const PostView = (props: Props) => {
-	const [postData, setPostData] = useState<any[]>([]);
+const PostView = ({ postData, ...props }: Props) => {
+	const [postDataState, setPostDataState] = useState<PostData>({ ...postData });
 
-	useEffect(() => {
-		const getPosts = async () => {
-			const raw_data = await request(
-				`/api/community/posts/${props.communityName}`
+	const onVoteClick = async (action: "upvote" | "downvote") => {
+		try {
+			const rawData = await request(
+				`/api/posts/${action}/${postDataState.id}/`
 			);
-			const data = await raw_data.json();
+			const res = await rawData.json();
 
-			console.log(data);
-
-			setPostData(data.data);
-		};
-
-		getPosts();
-	}, []);
+			if (res.ok) {
+				setPostDataState(res.data);
+			}
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
 	return (
-		<div>
-			<div>
-				{postData.map((p, i) => (
-					<MarkdownViewer initialValue={p.body} key={i} />
-				))}
+		<div className={`${classes.container} drop-shadow mt-40 mb-40`}>
+			<div className={`${classes.head} lite-shadow`}>
+				<img
+					src={props.communityIcon}
+					alt={props.communityName}
+					className={`mr-20 lite-shadow ${classes.icon}`}
+				/>
+				<a href={`/x/${props.communityName}/`} className={`underline`}>
+					x/{props.communityName}
+				</a>
+				<span>&nbsp;posted by&nbsp;</span>
+				<span className={classes.userName}>s/{postDataState.createdUser}</span>
+				<span>&nbsp;on&nbsp;{postDataState.createdDate}&nbsp;</span>
 			</div>
+			<MarkdownViewer
+				initialValue={postDataState.body}
+				title={postDataState.title}
+				upvoted={postDataState.upvoted}
+				downvoted={postDataState.downvoted}
+				voteCount={postDataState.upvoteCount - postDataState.downvoteCount}
+				onDownvoteClick={() => onVoteClick("downvote")}
+				onUpvoteClick={() => onVoteClick("upvote")}
+			/>
 		</div>
 	);
 };

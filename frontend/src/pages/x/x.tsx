@@ -3,20 +3,9 @@ import { render } from "preact";
 import Nav from "@/components/Nav/Nav";
 import classes from "./x.module.css";
 import CommunityCard from "@/components/CommunityCard/CommunityCard";
+import type { CommunityData } from "@/types";
 
-declare const __communityData:
-	| {
-			name: string;
-			id: number;
-			topic: string;
-			description: string;
-			moderator: string;
-			createdDate: string;
-			iconPath: string;
-			participantsCount: number;
-			userJoined: boolean;
-	  }
-	| undefined;
+declare const __communityData: CommunityData | undefined;
 
 const X = () => {
 	if (!__communityData)
@@ -25,9 +14,9 @@ const X = () => {
 	console.log(__communityData);
 
 	return (
-		<div className={classes.container}>
+		<div className={`${classes.container} main`}>
 			<Nav />
-			<main className={`container mt-30`}>
+			<main className={`container pad`}>
 				<h2 className={`mb-30`}>Community :</h2>
 				<CommunityCard data={__communityData} />
 			</main>

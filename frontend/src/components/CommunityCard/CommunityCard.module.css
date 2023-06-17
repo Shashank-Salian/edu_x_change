@@ -29,6 +29,7 @@
 	width: 120px;
 	border-radius: 50%;
 	border: 4px solid var(--white);
+	background-color: var(--red);
 }
 
 .participants {

@@ -15,10 +15,23 @@
 		    'topic': `{{ comm_data.topic }}`,
 		    'description': `{{ comm_data.description }}`,
 		    'moderator': `{{ comm_data.moderator }}`,
-		    'createdTime': `{{ comm_data.createdDate }}`,
+		    'createdDate': `{{ comm_data.createdDate }}`,
 		    'iconPath': `{{ comm_data.iconPath }}`,
 			'participantsCount': {{ comm_data.participantsCount }},
 			'userJoined': {% if comm_data.userJoined %}true{% else %}false{% endif %}
+		}
+		{% endif %}
+
+		{% if user_data %}
+		const __userData = {
+			'id': {{ user_data.id }},
+			'name': `{{ user_data.name }}`,
+			'username': `{{ user_data.username }}`,
+			'email': `{{ user_data.email }}`,
+			'createdDate': `{{ user_data.createdDate }}`,
+			'isActive': {% if user_data.is_active %}true{% else %}false{% endif %},
+			'isSuperuser': {% if user_data.is_superuser %}true{% else %}false{% endif %},
+			'isStaff': {% if user_data.is_staff %}true{% else %}false{% endif %}
 		}
 		{% endif %}
 	</script>

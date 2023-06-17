@@ -1,36 +1,115 @@
+import { useEffect, useState } from "preact/hooks";
+
+import { request } from "@/utils/utils";
+import { PostData } from "@/utils/types";
 import PostView from "../PostView/PostView";
 import Button from "../UI/Button/Button";
 
 import classes from "./CommunityCard.module.css";
+import { CommunityData } from "@/utils/types";
+import Spinner from "../UI/Spinner/Spinner";
 
 type Props = {
-	data: {
-		name: string;
-		id: number;
-		topic: string;
-		description: string;
-		moderator: string;
-		createdDate: string;
-		iconPath: string;
-		participantsCount: number;
-		userJoined: boolean;
-	};
+	data: CommunityData;
 };
 
-const CommunityCard = ({ data }: Props) => {
+const CommunityCard = ({ data, ...props }: Props) => {
+	const [postData, setPostData] = useState<PostData[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
+
+	useEffect(() => {
+		const getPosts = async () => {
+			try {
+				setIsLoading(true);
+				const raw_data = await request(`/api/community/posts/${data.name}/`);
+				const postData = await raw_data.json();
+
+				setIsLoading(false);
+				console.log(postData);
+
+				if (postData.ok) {
+					setPostData(postData.data);
+					return;
+				}
+
+				alert("Couldn't fetch posts");
+			} catch (err) {
+				setIsLoading(false);
+				console.error(err);
+				alert("Couldn't fetch posts, something went wrong!");
+			}
+		};
+
+		getPosts();
+	}, []);
+
 	return (
 		<div className={`${classes.container} drop-shadow`}>
 			<Head data={data} />
 			<div className={classes.pad}>
 				<h2>Posts :</h2>
 
-				<PostView communityName={data.name} />
+				{postData.length === 0 ? (
+					isLoading ? (
+						<div className='flx-c'>
+							<Spinner />
+						</div>
+					) : (
+						<h1 className={`mt-40`} style={{ textAlign: "center" }}>
+							No posts found
+						</h1>
+					)
+				) : (
+					postData.map((post) => (
+						<PostView
+							postData={post}
+							communityName={data.name}
+							communityIcon={data.iconPath}
+						/>
+					))
+				)}
 			</div>
 		</div>
 	);
 };
 
 const Head = ({ data }: Props) => {
+	const onLeaveClick = async () => {
+		try {
+			const rawData = await request(`/api/community/leave/${data.name}/`);
+			const reqData = await rawData.json();
+
+			if (reqData.ok) {
+				alert(reqData.message);
+				location.reload();
+				return;
+			}
+
+			alert(reqData.message);
+		} catch (err) {
+			console.error(err);
+			alert("Something wen't wrong");
+		}
+	};
+
+	const onJoinClick = async () => {
+		try {
+			const rawData = await request(`/api/community/join/${data.name}/`);
+			const reqData = await rawData.json();
+
+			if (reqData.ok) {
+				alert(reqData.message);
+				location.reload();
+				return;
+			}
+
+			alert(reqData.message);
+		} catch (err) {
+			console.error(err);
+			alert("Something wen't wrong");
+		}
+	};
+
 	return (
 		<div className={`${classes.headContainer} ${classes.pad} lite-shadow`}>
 			<div className={classes.left}>
@@ -55,8 +134,12 @@ const Head = ({ data }: Props) => {
 					<h2>{data.participantsCount}</h2>
 				</div>
 				<div>
-					<Button className={classes.joinBtn}>
-						{data.userJoined ? "Joined" : "Join"}
+					<Button
+						className={classes.joinBtn}
+						color={data.userJoined ? "red" : undefined}
+						onClick={data.userJoined ? onLeaveClick : onJoinClick}
+					>
+						{data.userJoined ? "Leave" : "Join"}
 					</Button>
 				</div>
 			</div>

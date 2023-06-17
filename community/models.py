@@ -2,7 +2,7 @@ from django.db import models
 from users.models import Users
 
 from basic.exceptions import AlreadyExistException, ValidationException
-from basic.utils import get_logger, is_valid_image
+from basic.utils import get_logger, is_valid_image, is_valid_comm_name
 
 logger = get_logger(__name__)
 
@@ -27,10 +27,9 @@ class Community(models.Model):
 	                              on_delete=models.SET_NULL)
 
 	def validate_community(self):
-		if self.name is None or len(self.name) < 3 or len(
-		    self.name) > 25 or self.topic is None or len(
-		        self.topic) < 3 or len(self.topic) > 25 or len(
-		            self.description) > 500:
+		if not is_valid_comm_name(
+		    self.name) or self.topic is None or len(self.topic) < 3 or len(
+		        self.topic) > 25 or len(self.description) > 500:
 			raise ValidationException("Some field entered were invalid!",
 			                          "INVALID_FIELD")
 

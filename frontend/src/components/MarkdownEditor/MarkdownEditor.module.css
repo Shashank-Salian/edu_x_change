@@ -8,8 +8,20 @@
 }
 
 
-.viewer {
-	background-color: var(--white);
-	padding: 30px 20px;
-	border-radius: 4px;
+.viewerContainer {
+	padding: 18px 16px;
+}
+
+.viewerWrapper {
+	display: flex;
+}
+
+.btn {
+	cursor: pointer;
+	display: flex;
+}
+
+.count {
+	text-align: center;
+	font-weight: 700;
 }

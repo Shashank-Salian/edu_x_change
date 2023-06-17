@@ -21,7 +21,8 @@
 			"@/components/*": ["./src/components/*"],
 			"@/assets/*": ["./src/assets/*"],
 			"@/utils/*": ["./src/utils/*"],
-			"@/hooks/*": ["./src/hooks/*"]
+			"@/hooks/*": ["./src/hooks/*"],
+			"@/types": ["./src/utils/types.ts"]
 		},
 
 		/* Linting */

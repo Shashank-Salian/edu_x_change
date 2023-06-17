@@ -96,15 +96,6 @@ def get_user_info(req: HttpRequest):
 		    NotAuthorizedException("Login to get info")),
 		                    status=401)
 
-	print(req.user)
-	u = req.user
-	if not req.user.is_active:
-		return JsonResponse(error_resp_data(
-		    NotAuthorizedException("Login to get info")),
-		                    status=401)
-	return JsonResponse({
-	    "fullName": u.name,
-	    "email": u.email,
-	    "username": u.username,
-	    "isActive": u.is_active
-	})
+	u_data = get_user_data(req.user)
+	resp = success_resp_data("User data retrieved successfully", data=u_data)
+	return JsonResponse(resp)

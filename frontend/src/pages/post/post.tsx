@@ -192,9 +192,9 @@ const Post = () => {
 	};
 
 	return (
-		<div className={classes.container}>
+		<div className={`${classes.container} main`}>
 			<Nav />
-			<main className={`container mt-30`}>
+			<main className={`container pad`}>
 				<h2 className={`mb-20`}>Create Post :</h2>
 				<div className={classes.inpContainer}>
 					<span className={`mr-30`}>Choose community :</span>

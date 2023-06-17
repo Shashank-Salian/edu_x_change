@@ -31,14 +31,9 @@ def get_comm_data(com: Community):
 # Create your views here.
 def comm_page(req: HttpRequest, c_name: str):
 	if not req.user.is_active:
-		err = error_resp_data(
-		    NotAuthorizedException("Log in to get my communities",
-		                           "NO_PERMISSION"))
-		return JsonResponse(err, status=403)
+		return redirect('/login/')
 
 	logger.debug(c_name)
-	start = int(req.GET.get('from', 0))
-	end = req.GET.get('to', start + 10)
 
 	try:
 		com = Community.objects.get(name=c_name)
@@ -47,7 +42,10 @@ def comm_page(req: HttpRequest, c_name: str):
 		comm_data.setdefault('userJoined', com.user_exists(req.user.username))
 
 		return HttpResponse(
-		    render_and_minify("x/index.html", {"comm_data": comm_data}))
+		    render_and_minify("x/index.html", {
+		        "comm_data": comm_data,
+		        "user_data": get_user_data(req.user)
+		    }))
 	except Community.DoesNotExist:
 		return redirect('/404/', status=404)
 	except Exception as e:
@@ -95,6 +93,56 @@ def create_community(req: HttpRequest):
 	except AlreadyExistException as e:
 		resp = error_resp_data(e)
 		return JsonResponse(resp, status=409)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def join_community(req: HttpRequest, c_name: str):
+	if not req.user.is_active:
+		err = error_resp_data(
+		    NotAuthorizedException("Log in to get icon", "NO_PERMISSION"))
+		return JsonResponse(err, status=403)
+
+	try:
+		com = Community.objects.get(name=c_name)
+		if com.user_exists(req.user.username):
+			resp = error_resp_data(
+			    AlreadyExistException("User has already joined"))
+			return JsonResponse(resp, status=409)
+		com.participants.add(req.user)
+		resp = success_resp_data("Community joined successfully")
+		return JsonResponse(resp)
+	except Community.DoesNotExist:
+		resp = error_resp_data(
+		    DoesNotExistException(
+		        f"Community with name '{c_name}' does not exists.",
+		        "COMMUNITY_DOES_NOT_EXIST"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def leave_community(req: HttpRequest, c_name: str):
+	if not req.user.is_active:
+		err = error_resp_data(
+		    NotAuthorizedException("Log in to get icon", "NO_PERMISSION"))
+		return JsonResponse(err, status=403)
+
+	try:
+		com = Community.objects.get(name=c_name)
+		com.participants.remove(req.user)
+		resp = success_resp_data("Community left successfully")
+		return JsonResponse(resp)
+	except Community.DoesNotExist:
+		resp = error_resp_data(
+		    DoesNotExistException(
+		        f"Community with name '{c_name}' does not exists.",
+		        "COMMUNITY_DOES_NOT_EXIST"))
+		return JsonResponse(resp, status=404)
 	except Exception as e:
 		logger.error(e)
 		resp = error_resp_data(ServerException())
@@ -159,23 +207,13 @@ def comm_posts(req: HttpRequest, c_name: str):
 		return JsonResponse(err, status=403)
 
 	try:
-		com = Community.objects.get(name=c_name)
-
 		raw_posts = Posts.objects.filter(
-		    community=com, is_drafted=False).order_by('created_time')
+		    community__name=c_name,
+		    is_drafted=False).order_by('created_time').reverse()
 		posts = []
 
 		for p in raw_posts:
-			posts.append({
-			    'id': p.id,
-			    'title': p.title,
-			    'body': p.body,
-			    'community': p.community.name,
-			    'createdUser': p.created_user.username,
-			    'upvoteCount': p.upvote_count,
-			    'downvoteCount': p.downvote_count,
-			    'createdDate': format_date(p.created_time),
-			})
+			posts.append(get_post_data(p, req.user))
 
 		resp = success_resp_data("Posts retrieved successfully", data=posts)
 		return JsonResponse(resp)
@@ -187,5 +225,3 @@ def comm_posts(req: HttpRequest, c_name: str):
 	except Exception as e:
 		logger.error(e)
 		return HttpResponse("Internal server error!", status=500)
-
-	pass

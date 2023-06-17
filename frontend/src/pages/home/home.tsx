@@ -1,47 +1,52 @@
 import { render } from "preact";
 import { useEffect, useState } from "preact/hooks";
+
 import Nav from "@/components/Nav/Nav";
-import { request } from "@/utils/utils";
+import type { PostData, UserData } from "@/types";
 
 import classes from "./home.module.css";
+import { request } from "@/utils/utils";
+import PostView from "@/components/PostView/PostView";
 
-type UserInfo = {
-	fullName: string;
-	email: string;
-	username: string;
-	isActive: boolean;
-};
+declare const __userData: UserData | undefined;
 
 const HomePage = () => {
-	const [userInfo, setUserInfo] = useState<UserInfo>();
+	if (!__userData) return <span>Something went wrong!</span>;
 
-	const getUserInfo = async () => {
-		const res = await request("/api/users/userinfo/");
-		const uInfo = await res.json();
-
-		setUserInfo(uInfo);
-	};
+	const [posts, setPosts] = useState<PostData[]>([]);
 
 	useEffect(() => {
-		getUserInfo();
+		const getPosts = async () => {
+			try {
+				const rawData = await request("/api/posts/recent/");
+				const postData = await rawData.json();
+
+				if (postData.ok) {
+					setPosts(postData.data);
+				}
+			} catch (err) {
+				console.error(err);
+			}
+		};
+
+		getPosts();
 	}, []);
 
 	return (
-		<div className={classes.container}>
+		<div className={`${classes.container} main`}>
 			<Nav />
-			<h1>Home</h1>
-			{userInfo && (
-				<>
-					<p>{userInfo.fullName}</p>
-					<p>{userInfo.email}</p>
-					<p>{userInfo.username}</p>
-					<p>{userInfo.isActive}</p>
-				</>
-			)}
-			{/* {communityData.name}
-			<br />
-			{communityData &&
-				communityData.participants.map((e: any) => <span>{e}</span>)} */}
+			<div className={`container pad`}>
+				<h2>Home</h2>
+
+				{posts.map((post, i) => (
+					<PostView
+						postData={post}
+						communityIcon={`/api/community/icon/${post.community}/`}
+						communityName={post.community}
+						key={i}
+					/>
+				))}
+			</div>
 		</div>
 	);
 };

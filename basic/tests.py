@@ -39,6 +39,7 @@ class TestValidationRules(unittest.TestCase):
 		self.assertFalse(is_valid_username('dasda+23sd'))
 		self.assertFalse(is_valid_username('dasda.sd'))
 		self.assertFalse(is_valid_username('dadoakdopakdokapsokdskd'))
+		self.assertFalse(is_valid_username('     '))
 
 	def test_valid_password(self):
 		self.assertTrue(is_valid_password('sjsusjip'))

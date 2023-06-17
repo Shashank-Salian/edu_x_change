@@ -5,7 +5,7 @@ import classes from "./notfound.module.css";
 
 const NotFound = () => {
 	return (
-		<div className={classes.container}>
+		<div className={`${classes.container} main`}>
 			<Nav />
 			<div className={`container`}>
 				<div className={classes.content}>
