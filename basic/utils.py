@@ -29,17 +29,31 @@ def get_user_data(user):
 
 def get_post_data(post, user):
 	return {
-	    'id': post.id,
-	    'title': post.title,
-	    'body': post.body,
-	    'community': post.community.name,
-	    'createdUser': post.created_user.username,
-	    'upvoteCount': post.upvotes_users.count(),
-	    'downvoteCount': post.downvotes_users.count(),
-	    'createdDate': format_date(post.created_time),
-	    'upvoted': post.upvotes_users.filter(username=user.username).exists(),
+	    'id':
+	    post.id,
+	    'title':
+	    post.title,
+	    'body':
+	    post.body,
+	    'community':
+	    post.community.name,
+	    'createdUser':
+	    post.created_user.username,
+	    'upvoteCount':
+	    post.upvotes_users.count(),
+	    'downvoteCount':
+	    post.downvotes_users.count(),
+	    'createdDate':
+	    format_date(post.created_time),
+	    'upvoted':
+	    post.upvotes_users.filter(username=user.username).exists(),
 	    'downvoted':
 	    post.downvotes_users.filter(username=user.username).exists(),
+	    'notes': [{
+	        'name':
+	        f'{f.notes_file.name.replace("userassets/posts_files/", "")}',
+	        'link': f"/api/posts/notes/{post.id}/{f.id}"
+	    } for f in post.files.exclude(notes_file_name=None)]
 	}
 
 
@@ -152,3 +166,20 @@ def format_com_icon_url(name):
 
 def format_post_imgs(name):
 	return f"/api/posts/image/{name}"
+
+
+def is_valid_pdf(file):
+	if file.size > (1024 * 1024 * 10):
+		return False
+	signature = file.read(4)
+	startxref_offset = find_startxref_offset(file)
+	return signature == b'%PDF' and startxref_offset != -1
+
+
+def find_startxref_offset(file):
+	file.seek(-1024, 2)
+	buffer = file.read()
+	startxref_index = buffer.rfind(b'startxref')
+	if startxref_index != -1:
+		return startxref_index
+	return -1

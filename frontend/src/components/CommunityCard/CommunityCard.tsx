@@ -13,7 +13,7 @@ type Props = {
 	data: CommunityData;
 };
 
-const CommunityCard = ({ data, ...props }: Props) => {
+const CommunityCard = ({ data }: Props) => {
 	const [postData, setPostData] = useState<PostData[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 

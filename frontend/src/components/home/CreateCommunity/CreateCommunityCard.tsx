@@ -8,7 +8,7 @@ import Button from "@/components/UI/Button/Button";
 
 import classes from "./CreateCommunityCard.module.css";
 
-import { getCookie, request } from "@/utils/utils";
+import { request } from "@/utils/utils";
 
 type Props = {
 	onCloseClick?: JSX.MouseEventHandler<HTMLDivElement>;

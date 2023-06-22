@@ -8,6 +8,7 @@ import Select from "@/components/UI/Select/Select";
 import Input from "@/components/UI/Input/Input";
 import Button from "@/components/UI/Button/Button";
 import { debounce, request } from "@/utils/utils";
+import FileInput from "@/components/UI/Input/FileInput";
 
 type SelectInput = JSX.GenericEventHandler<
 	HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement
@@ -19,17 +20,18 @@ const Post = () => {
 	const [communitySelected, setCommunitySelected] = useState<string>();
 	const [communities, setCommunities] = useState([]);
 	const [messageData, setMessageData] = useState<MessageData>();
+	const [notesFiles, setNotesFiles] = useState<File[]>();
 
 	const editor = useRef<any>();
 
-	const draftPost = async (formData: FormData, is_submit = false) => {
+	const draftPost = async (formData: FormData, isSubmit = false) => {
 		try {
 			setMessageData({
-				message: is_submit ? "Saving..." : "Drafting...",
+				message: isSubmit ? "Saving..." : "Drafting...",
 				type: "normal",
 			});
 			const res = await request(
-				`/api/posts/${is_submit ? "save" : "draft"}/`,
+				`/api/posts/${isSubmit ? "save" : "draft"}/`,
 				formData,
 				"POST"
 			);
@@ -39,11 +41,11 @@ const Post = () => {
 
 			if (data.ok) {
 				setMessageData({
-					message: is_submit ? "Saved" : "Drafted",
+					message: isSubmit ? "Saved" : "Drafted",
 					type: "success",
 				});
 
-				if (is_submit) {
+				if (isSubmit) {
 					setTitle("");
 					setCommunitySelected("");
 					editor.current.setMarkdown("");
@@ -150,7 +152,10 @@ const Post = () => {
 	const onImageInput = (blob: Blob | File, cb: Function) => {
 		const sendImg = async () => {
 			const formData = new FormData();
-			formData.append("image", blob);
+			const file = new File([blob], blob.name.replace(/\s/g, ""), {
+				type: blob.type,
+			});
+			formData.append("image", file);
 
 			const res = await request("/api/posts/image/", formData, "POST");
 			const data = await res.json();
@@ -169,9 +174,43 @@ const Post = () => {
 		sendImg();
 	};
 
+	const onNotesInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
+		if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+			const inpFiles = e.currentTarget.files;
+			if (inpFiles.length > 5) {
+				setMessageData({
+					message: "Maximum 5 files allowed",
+					type: "error",
+				});
+				return;
+			}
+
+			for (let inpFile of inpFiles) {
+				if (!inpFile.name.endsWith(".pdf")) {
+					setMessageData({
+						message: "Only PDF files are allowed",
+						type: "error",
+					});
+					return;
+				}
+			}
+			setNotesFiles(() => {
+				if (inpFiles) {
+					const files = [];
+					for (let file of inpFiles) files.push(file);
+
+					console.log(files);
+
+					return files;
+				}
+			});
+		}
+	};
+
 	const onSubmit = async () => {
 		const formData = new FormData();
 		console.log(title, communitySelected, editor);
+		console.log(notesFiles);
 		if (
 			title.length < 3 ||
 			title.length > 100 ||
@@ -187,6 +226,8 @@ const Post = () => {
 		formData.append("title", title);
 		formData.append("body", editor.current?.getMarkdown());
 		formData.append("community", communitySelected);
+		if (notesFiles)
+			for (const file of notesFiles) formData.append("notes", file);
 
 		draftPost(formData, true);
 	};
@@ -215,14 +256,43 @@ const Post = () => {
 
 				<div className={`mt-30`}>
 					<span>Post contents :</span>
-					<MarkdownEditor
-						className='mt-20'
-						onEditorInitialized={(ed) => {
-							editor.current = ed;
-						}}
-						onInput={onMarkdownInput}
-						onImageInput={onImageInput}
-					/>
+					<div className={classes.markdownContainer}>
+						<MarkdownEditor
+							className={`mt-20 ${classes.markdown}`}
+							onEditorInitialized={(ed) => {
+								editor.current = ed;
+							}}
+							onInput={onMarkdownInput}
+							onImageInput={onImageInput}
+						/>
+						<div className={`${classes.filesContainer} ml-20`}>
+							<p className={`mb-20`}>Attach notes :</p>
+							<FileInput
+								text='Notes'
+								multiple
+								width='100px'
+								accept='.pdf'
+								placeholder={
+									<ul style={{ maxWidth: "120px" }} className={`mt-20`}>
+										{notesFiles?.map((file, i) => (
+											<li
+												style={{
+													textOverflow: "ellipsis",
+													overflow: "hidden",
+													whiteSpace: "nowrap",
+												}}
+												title={file.name}
+												key={i}
+											>
+												{file.name}
+											</li>
+										))}
+									</ul>
+								}
+								onInput={onNotesInput}
+							/>
+						</div>
+					</div>
 				</div>
 				<div className={`mt-30 ${classes.btnContainer}`}>
 					<span data-type={messageData?.type} className={classes.message}>
@@ -230,6 +300,7 @@ const Post = () => {
 					</span>
 					<Button onClick={onSubmit}>Submit</Button>
 				</div>
+				<span>Note: PDF files won't be drafted!</span>
 			</main>
 		</div>
 	);

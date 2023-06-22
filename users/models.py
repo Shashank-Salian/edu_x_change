@@ -18,7 +18,7 @@ class UsersManager(BaseUserManager):
 		                         email=email,
 		                         name=name,
 		                         **extra_fields)
-		if user.user_exists(self.username):
+		if user.user_exists(user.username):
 			raise AlreadyExistException(
 			    f'User with "{self.username}" username already exist',
 			    "USERNAME_TAKEN")

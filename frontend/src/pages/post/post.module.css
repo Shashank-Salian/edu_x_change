@@ -10,9 +10,25 @@
 	align-items: center;
 }
 
+.markdownContainer {
+	display: flex;
+}
+
+.markdown {
+	flex: 1;
+}
+
+.filesContainer {
+	margin-top: -20px;
+}
+
 .btnContainer {
 	display: flex;
 	justify-content: space-between;
+}
+
+.message {
+	font-weight: 600;
 }
 
 .message[data-type="error"] {

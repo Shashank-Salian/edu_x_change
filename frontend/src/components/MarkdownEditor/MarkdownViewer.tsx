@@ -8,30 +8,28 @@ import "prismjs/themes/prism.min.css";
 
 import classes from "./MarkdownEditor.module.css";
 import Upvote from "@/assets/icons/Upvote";
+import Button from "../UI/Button/Button";
+import { PostData } from "@/utils/types";
 
 type Props = {
-	title?: string;
-	initialValue?: string;
-	voteCount?: string | number;
+	postData: PostData;
 	className?: string;
 	onUpvoteClick?: JSX.MouseEventHandler<HTMLDivElement>;
 	onDownvoteClick?: JSX.MouseEventHandler<HTMLDivElement>;
-	upvoted?: boolean;
-	downvoted?: boolean;
 };
 
-const MarkdownViewer = (props: Props) => {
+const MarkdownViewer = ({ postData, ...props }: Props) => {
 	const viewerElRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
-		const viewer = new Viewer({
+		new Viewer({
 			el: viewerElRef.current!,
 			height: "100%",
-			initialValue: props.initialValue,
+			initialValue: postData.body,
 			plugins: [[codeSyntaxHighlight, { highlighter: Prism }]],
 		});
 
-		console.log(viewer);
+		console.log(postData.notes);
 	}, []);
 
 	return (
@@ -41,16 +39,35 @@ const MarkdownViewer = (props: Props) => {
 			<div className={classes.viewerWrapper}>
 				<div className={`mr-20`}>
 					<div className={classes.btn} onClick={props.onUpvoteClick}>
-						<Upvote width='36' fill={props.upvoted} />
+						<Upvote width='36' fill={postData.upvoted} />
 					</div>
-					<p className={`mt-5 mb-5 ${classes.count}`}>{props.voteCount}</p>
+					<p className={`mt-5 mb-5 ${classes.count}`}>
+						{postData.upvoteCount - postData.downvoteCount}
+					</p>
 					<div className={classes.btn} onClick={props.onDownvoteClick}>
-						<Upvote down width='36' fill={props.downvoted} />
+						<Upvote down width='36' fill={postData.downvoted} />
 					</div>
 				</div>
-				<div>
-					<h1 className={`mb-30`}>{props.title}</h1>
+				<div style={{ width: "100%" }}>
+					<h1 className={`mb-30`}>{postData.title}</h1>
 					<div ref={viewerElRef}></div>
+					<div>
+						<hr />
+						<p className='mb-10 mt-5'>Notes :</p>
+						<div className={classes.notesBtnWrapper}>
+							{postData.notes.map((note, i) => (
+								<a
+									href={note.link}
+									className='mr-10 lite-shadow'
+									key={i}
+									style={{ textAlign: "center" }}
+									title={note.name}
+								>
+									{note.name}
+								</a>
+							))}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

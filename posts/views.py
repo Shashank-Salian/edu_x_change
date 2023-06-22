@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.http import HttpResponse, HttpRequest, JsonResponse, FileResponse
 from django.views import View
 from django.shortcuts import redirect
 
@@ -7,7 +7,7 @@ import time
 from basic.exceptions import *
 from basic.utils import *
 from community.models import Community
-from .models import Posts, PostsImagesStore
+from .models import Posts, PostsFilesStore
 from users.models import Users
 
 
@@ -15,13 +15,15 @@ def create_post_and_respond(user,
                             title=None,
                             community=None,
                             body=None,
-                            is_drafted=True):
+                            is_drafted=True,
+                            files=[]):
 	"""
 	Create a new post and responds with a JSON object.
 	The user parameter is required, and represents the user creating the post. 
 
 	Returns a JSON response object.
 	"""
+
 	try:
 		p = Posts(title=title,
 		          community=community,
@@ -30,6 +32,13 @@ def create_post_and_respond(user,
 		          created_user=user)
 		p.validate_post()
 		p.save()
+
+		for file in files:
+			f_name = f"{time.time()}_{p.id}_{file.name}"
+			f_store = PostsFilesStore(notes_file=file, notes_file_name=f_name)
+			f_store.save()
+			p.files.add(f_store)
+
 		key = "drafted" if is_drafted else "saved"
 		resp = success_resp_data(f"Post {key} successfully")
 		return JsonResponse(resp)
@@ -131,6 +140,19 @@ def save(req: HttpRequest):
 	title = req.POST.get('title')
 	body = req.POST.get('body')
 	comm_name = req.POST.get('community')
+	notes = req.FILES.getlist('notes', [])
+
+	if len(notes) > 5:
+		resp = error_resp_data(
+		    InvalidFileException("At max only 5 notes allowed"))
+		return JsonResponse(resp, status=406)
+
+	for note in notes:
+		if not is_valid_pdf(note):
+			resp = error_resp_data(
+			    InvalidFileException(
+			        "Enter valid PDF file and size should be less than 10MB"))
+			return JsonResponse(resp, status=406)
 
 	community = None
 
@@ -156,6 +178,13 @@ def save(req: HttpRequest):
 		drafted.community = community
 		drafted.is_drafted = False
 
+		for note in notes:
+			f_name = f"{time.time()}_{drafted.id}_{note.name}"
+			file_store = PostsFilesStore(notes_file=note,
+			                             notes_file_name=f_name)
+			file_store.save()
+			drafted.files.add(file_store)
+
 		drafted.validate_post()
 		drafted.save()
 		resp = success_resp_data("Post created successfully")
@@ -165,7 +194,8 @@ def save(req: HttpRequest):
 		                               title=title,
 		                               body=body,
 		                               community=community,
-		                               is_drafted=False)
+		                               is_drafted=False,
+		                               files=notes)
 	except ValidationException as e:
 		resp = error_resp_data(e)
 		return JsonResponse(resp, status=406)
@@ -176,6 +206,34 @@ def save(req: HttpRequest):
 
 	resp = error_resp_data(ServerException())
 	return JsonResponse(resp, status=500)
+
+
+def notes_view(req: HttpRequest, p_id: int, f_id: int):
+	if not req.user.is_active:
+		resp = error_resp_data(
+		    NotAuthorizedException("Not authorized to view files"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		p = Posts.objects.get(id=p_id)
+		f = p.files.filter(id=f_id)
+		if f.exists():
+			f_resp_name = f[0].notes_file.name.replace(
+			    "userassets/posts_files/", "")
+			resp = FileResponse(f[0].notes_file)
+			resp['Content-Type'] = 'application/pdf'
+			resp['Content-Disposition'] = 'attachment; filename=' + f_resp_name
+			return resp
+
+		resp = error_resp_data(DoesNotExistException("File does not exist"))
+		return JsonResponse(resp, status=404)
+	except Posts.DoesNotExist:
+		resp = error_resp_data(DoesNotExistException("Post does not exist"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
 
 
 class Draft(View):
@@ -217,8 +275,6 @@ class Draft(View):
 		title = req.POST.get('title')
 		comm_name = req.POST.get('community')
 		body = req.POST.get('body')
-
-		print(title, comm_name, body)
 
 		community = None
 
@@ -275,10 +331,10 @@ class ImageView(View):
 			return JsonResponse(resp, status=401)
 
 		try:
-			img = PostsImagesStore.objects.get(image_name=img_name)
+			img = PostsFilesStore.objects.get(image_name=img_name)
 			resp = HttpResponse(img.image, content_type="image/png")
 			return resp
-		except PostsImagesStore.DoesNotExist as e:
+		except PostsFilesStore.DoesNotExist as e:
 			resp = redirect('/static/image_error.svg', status=404)
 			return resp
 		except Exception as e:
@@ -305,12 +361,13 @@ class ImageView(View):
 		try:
 			drafted_post = Posts.objects.get(created_user=req.user,
 			                                 is_drafted=True)
-			img_name = f"{time.time()}_{drafted_post.id}_{img.name}"
+			img_name = img.name.replace(" ", "")
+			img_name = f"{time.time()}_{drafted_post.id}_{img_name}"
 
-			img_db = PostsImagesStore(image=img, image_name=img_name)
+			img_db = PostsFilesStore(image=img, image_name=img_name)
 			img_db.save()
 
-			drafted_post.images.add(img_db)
+			drafted_post.files.add(img_db)
 			drafted_post.save()
 			resp = success_resp_data("Image added successfully",
 			                         data=format_post_imgs(img_db.image_name))

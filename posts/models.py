@@ -6,9 +6,13 @@ from basic.utils import is_valid_post_title, is_valid_post_body
 # Create your models here.
 
 
-class PostsImagesStore(Model):
-	image = models.ImageField(upload_to="userassets/posts_images/")
+class PostsFilesStore(Model):
+	image = models.ImageField(upload_to="userassets/posts_images/",
+	                          default=None)
 	image_name = models.CharField(max_length=100, default=None, null=True)
+	notes_file = models.FileField(upload_to="userassets/posts_files/",
+	                              default=None)
+	notes_file_name = models.CharField(max_length=100, default=None, null=True)
 
 
 class Posts(Model):
@@ -19,12 +23,12 @@ class Posts(Model):
 	                          null=True,
 	                          related_name='posts_created',
 	                          on_delete=models.SET_NULL)
-	images = models.ManyToManyField(PostsImagesStore, related_name='post')
-	upvotes_users = models.ManyToManyField("users.Users",
-	                                       related_name='posts_upvoted',
-	                                       null=True)
+	files = models.ManyToManyField(PostsFilesStore, related_name='post')
+	upvotes_users = models.ManyToManyField(
+	    "users.Users",
+	    related_name='posts_upvoted',
+	)
 	downvotes_users = models.ManyToManyField("users.Users",
-	                                         null=True,
 	                                         related_name='posts_downvoted')
 
 	community = ForeignKey('community.Community',

@@ -6,10 +6,14 @@ from basic.utils import get_logger, is_valid_image, is_valid_comm_name
 
 logger = get_logger(__name__)
 
+# from users.models import Users
+# from community.models import Community
+# from posts.models import Posts
+
 
 # Create your models here.
 class Community(models.Model):
-	name = models.CharField(max_length=25)
+	name = models.CharField(max_length=25, db_collation="utf8mb4_bin")
 	created_time = models.DateTimeField(auto_now_add=True)
 	participants = models.ManyToManyField(
 	    Users,

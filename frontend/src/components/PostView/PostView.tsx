@@ -45,11 +45,7 @@ const PostView = ({ postData, ...props }: Props) => {
 				<span>&nbsp;on&nbsp;{postDataState.createdDate}&nbsp;</span>
 			</div>
 			<MarkdownViewer
-				initialValue={postDataState.body}
-				title={postDataState.title}
-				upvoted={postDataState.upvoted}
-				downvoted={postDataState.downvoted}
-				voteCount={postDataState.upvoteCount - postDataState.downvoteCount}
+				postData={postDataState}
 				onDownvoteClick={() => onVoteClick("downvote")}
 				onUpvoteClick={() => onVoteClick("upvote")}
 			/>

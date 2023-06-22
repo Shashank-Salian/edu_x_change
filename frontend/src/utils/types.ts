@@ -21,6 +21,7 @@ interface PostData {
 	createdDate: string;
 	upvoted: boolean;
 	downvoted: boolean;
+	notes: { name: string; link: string }[];
 }
 
 interface UserData {
