@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 # Create your models here.
 class Community(models.Model):
-	name = models.CharField(max_length=25, db_collation="utf8mb4_bin")
+	name = models.CharField(max_length=25)
 	created_time = models.DateTimeField(auto_now_add=True)
 	participants = models.ManyToManyField(
 	    Users,

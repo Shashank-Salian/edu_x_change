@@ -98,7 +98,7 @@ const Head = ({ data }: Props) => {
 			const reqData = await rawData.json();
 
 			if (reqData.ok) {
-				alert(reqData.message);
+				// alert(reqData.message);
 				location.reload();
 				return;
 			}
@@ -121,10 +121,15 @@ const Head = ({ data }: Props) => {
 					/>
 				</div>
 				<div className={`mr-20`}>
-					<h2>
-						<span className={classes.x}>x/</span>
-						{data.name}
-					</h2>
+					<div>
+						<h2>
+							<span className={classes.x}>x/</span>
+							{data.name}
+						</h2>
+						<span>
+							Topic : <span style={{ fontWeight: "600" }}>{data.topic}</span>
+						</span>
+					</div>
 					<p className={`mt-10 ${classes.desc}`}>{data.description}</p>
 				</div>
 			</div>

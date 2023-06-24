@@ -24,10 +24,8 @@ class Posts(Model):
 	                          related_name='posts_created',
 	                          on_delete=models.SET_NULL)
 	files = models.ManyToManyField(PostsFilesStore, related_name='post')
-	upvotes_users = models.ManyToManyField(
-	    "users.Users",
-	    related_name='posts_upvoted',
-	)
+	upvotes_users = models.ManyToManyField("users.Users",
+	                                       related_name='posts_upvoted')
 	downvotes_users = models.ManyToManyField("users.Users",
 	                                         related_name='posts_downvoted')
 
@@ -35,6 +33,8 @@ class Posts(Model):
 	                       on_delete=models.CASCADE,
 	                       null=True,
 	                       default=None)
+	saved_by = models.ManyToManyField("users.Users",
+	                                  related_name='posts_saved')
 
 	is_drafted = models.BooleanField(default=False)
 
@@ -56,6 +56,13 @@ class Posts(Model):
 			    "Title and body must be at least 3 characters long",
 			    code="INVALID_POST")
 		return True
+
+	def delete(self, *args, **kwargs):
+		for f in self.files.all():
+			f.notes_file.delete()
+			f.image.delete()
+			f.delete()
+		super().delete(*args, **kwargs)
 
 	def __str__(self) -> str:
 		return self.title

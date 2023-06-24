@@ -16,6 +16,11 @@ function isValidEmail(email: string) {
 	return /^[a-z0-9+_-]+@[a-z0-9]+\.{1}[a-z0-9]{2,10}$/.test(email);
 }
 
+function isValidCommunityName(name: string, min = 3) {
+	const reg = new RegExp(`^(?!.*[A-Z])[\\w!$^*()|{}.+_\\-\\[\\]@]{${min},25}$`);
+	return reg.test(name);
+}
+
 function getCookie(cName: string) {
 	const cookies = document.cookie.split(";");
 	for (let i = 0; i < cookies.length; i++) {
@@ -39,4 +44,11 @@ function debounce(cb: (...args: any[]) => void, delay = 1000) {
 	};
 }
 
-export { request, isValidEmail, isValidUsername, getCookie, debounce };
+export {
+	request,
+	isValidEmail,
+	isValidUsername,
+	getCookie,
+	debounce,
+	isValidCommunityName,
+};

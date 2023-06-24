@@ -33,9 +33,7 @@ def signup_user(req: HttpRequest):
 		au = authenticate(username=username, password=password)
 		print(au)
 		if au is not None:
-			login(req, u)  # login the user
-			# return redirect("/")
-			resp = success_resp_data("User created and logged in successfully")
+			resp = success_resp_data("User created, login to continue")
 			return JsonResponse(resp)
 		resp = success_resp_data("Authentication error!")
 		return JsonResponse(resp)
@@ -69,7 +67,7 @@ def login_user(req: HttpRequest):
 
 		if au is not None:
 			login(req, au)
-			# redirect("/")
+			# return redirect("/")
 			resp = success_resp_data("User logged in successfully")
 			return JsonResponse(resp)
 

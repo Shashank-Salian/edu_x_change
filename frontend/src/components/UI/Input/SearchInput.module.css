@@ -1,0 +1,59 @@
+.container {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
+.listContainer {
+	position: absolute;
+	width: 100%;
+	list-style-type: none;
+	background-color: var(--white);
+	padding: 12px 8px;
+	top: 100%;
+	border-radius: 8px;
+	scrollbar-width: thin;
+	max-height: 550px;
+	overflow-y: scroll;
+}
+
+.listContainer::-webkit-scrollbar {
+	width: 6px;
+}
+
+.listContainer::-webkit-scrollbar-thumb {
+	background-color: #817c59;
+	border-radius: 4px;
+}
+
+.list {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: var(--black) !important;
+}
+
+.lhs {
+	display: flex;
+	align-items: center;
+}
+
+.icon {
+	border-radius: 50%;
+}
+
+.nameContainer {
+	display: flex;
+	flex-direction: column;
+}
+
+.name {
+	font-size: 1rem;
+	line-height: 1.2rem;
+	font-weight: 500;
+}
+
+.desc {
+	font-size: 0.6rem;
+	line-height: 0.8rem;
+}

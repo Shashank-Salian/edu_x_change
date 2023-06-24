@@ -8,7 +8,7 @@ import Button from "@/components/UI/Button/Button";
 
 import classes from "./CreateCommunityCard.module.css";
 
-import { request } from "@/utils/utils";
+import { isValidCommunityName, request } from "@/utils/utils";
 
 type Props = {
 	onCloseClick?: JSX.MouseEventHandler<HTMLDivElement>;
@@ -64,17 +64,30 @@ const CreateCommunityCard = (props: Props) => {
 	const onTextDataInput: JSX.GenericEventHandler<
 		HTMLInputElement | HTMLTextAreaElement
 	> = (e) => {
+		const val = e.currentTarget.value;
 		setTextInpData((prev) => {
 			const newState = { ...prev };
 			switch (e.currentTarget.name) {
 				case newState.commName.name:
-					newState.commName.value = e.currentTarget.value;
+					const lowerName = val.toLowerCase();
+					if (lowerName === "" || isValidCommunityName(lowerName, 1)) {
+						setErrorMsg({
+							message: "",
+							mode: "warn",
+						});
+						newState.commName.value = lowerName;
+						break;
+					}
+					setErrorMsg({
+						message: "Invalid community name",
+						mode: "error",
+					});
 					break;
 				case newState.topic.name:
-					newState.topic.value = e.currentTarget.value;
+					newState.topic.value = val;
 					break;
 				case newState.description.name:
-					newState.description.value = e.currentTarget.value;
+					newState.description.value = val;
 					break;
 			}
 			return newState;
@@ -86,8 +99,10 @@ const CreateCommunityCard = (props: Props) => {
 		e.stopImmediatePropagation();
 
 		if (
-			textInpData.commName.value.length > 2 &&
-			textInpData.topic.value.length > 2
+			isValidCommunityName(textInpData.commName.value) &&
+			textInpData.topic.value.length > 2 &&
+			textInpData.topic.value.length <= 25 &&
+			textInpData.description.value.length <= 500
 		) {
 			const formData = new FormData();
 			formData.append("communityName", textInpData.commName.value);
@@ -124,6 +139,11 @@ const CreateCommunityCard = (props: Props) => {
 				setIsLoading(false);
 				console.error(err);
 			}
+		} else {
+			setErrorMsg({
+				message: "Invalid input",
+				mode: "error",
+			});
 		}
 	};
 
@@ -169,6 +189,7 @@ const CreateCommunityCard = (props: Props) => {
 							value={textInpData.topic.value}
 							name={textInpData.topic.name}
 							className={`${classes.inp}`}
+							maxLength={25}
 							onInput={onTextDataInput}
 							required
 						/>

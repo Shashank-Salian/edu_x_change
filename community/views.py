@@ -63,10 +63,10 @@ def create_community(req: HttpRequest):
 		    NotAuthorizedException("Log in to create community"))
 		return JsonResponse(err, status=403)
 
-	commName = req.POST.get('communityName', None)
-	topic = req.POST.get('topic', None)
-	desc = req.POST.get('description', None)
-	icon_img = req.FILES.get('communityIcon', None)
+	commName = req.POST.get('communityName')
+	topic = req.POST.get('topic')
+	desc = req.POST.get('description')
+	icon_img = req.FILES.get('communityIcon')
 	print(commName, topic, desc, icon_img)
 
 	try:
@@ -76,6 +76,11 @@ def create_community(req: HttpRequest):
 			        "You don't have permission to create community",
 			        "NO_PERMISSION"))
 			return JsonResponse(resp, status=403)
+
+		if commName is None:
+			raise ValidationException("Community name is required")
+
+		commName = commName.lower()
 
 		com = Community(name=commName,
 		                topic=topic,
@@ -119,6 +124,42 @@ def join_community(req: HttpRequest, c_name: str):
 		    DoesNotExistException(
 		        f"Community with name '{c_name}' does not exists.",
 		        "COMMUNITY_DOES_NOT_EXIST"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def search(req: HttpRequest, query: str):
+	if not req.user.is_active:
+		err = error_resp_data(
+		    NotAuthorizedException("Log in to get icon", "NO_PERMISSION"))
+		return JsonResponse(err, status=403)
+
+	final_comm = []
+
+	try:
+		comm_res = Community.objects.filter(name__iexact=query)
+		final_comm.extend(comm_res)
+		com_res = Community.objects.filter(name__istartswith=query).exclude(
+		    name__iexact=query)[:20]
+		final_comm.extend(com_res)
+		if len(final_comm) <= 20:
+			com_res = Community.objects.filter(name__icontains=query).exclude(
+			    name__istartswith=query)[:10]
+			final_comm.extend(com_res)
+		if len(final_comm) <= 2:
+			com_res = Community.objects.filter(
+			    topic__istartswith=query).exclude(
+			        name__istartswith=query).exclude(
+			            name__icontains=query)[:10]
+			final_comm.extend(com_res)
+		resp = success_resp_data("Communities found",
+		                         data=[get_comm_data(c) for c in final_comm])
+		return JsonResponse(resp)
+	except Community.DoesNotExist:
+		resp = success_resp_data("No such community", data=[])
 		return JsonResponse(resp, status=404)
 	except Exception as e:
 		logger.error(e)

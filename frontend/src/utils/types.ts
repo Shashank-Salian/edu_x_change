@@ -22,6 +22,7 @@ interface PostData {
 	upvoted: boolean;
 	downvoted: boolean;
 	notes: { name: string; link: string }[];
+	communityModerator: string;
 }
 
 interface UserData {

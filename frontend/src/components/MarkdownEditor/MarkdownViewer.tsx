@@ -8,7 +8,6 @@ import "prismjs/themes/prism.min.css";
 
 import classes from "./MarkdownEditor.module.css";
 import Upvote from "@/assets/icons/Upvote";
-import Button from "../UI/Button/Button";
 import { PostData } from "@/utils/types";
 
 type Props = {
@@ -51,23 +50,25 @@ const MarkdownViewer = ({ postData, ...props }: Props) => {
 				<div style={{ width: "100%" }}>
 					<h1 className={`mb-30`}>{postData.title}</h1>
 					<div ref={viewerElRef}></div>
-					<div>
-						<hr />
-						<p className='mb-10 mt-5'>Notes :</p>
-						<div className={classes.notesBtnWrapper}>
-							{postData.notes.map((note, i) => (
-								<a
-									href={note.link}
-									className='mr-10 lite-shadow'
-									key={i}
-									style={{ textAlign: "center" }}
-									title={note.name}
-								>
-									{note.name}
-								</a>
-							))}
+					{postData.notes.length > 0 ? (
+						<div>
+							<hr />
+							<p className='mb-10 mt-5'>Notes :</p>
+							<div className={classes.notesBtnWrapper}>
+								{postData.notes.map((note, i) => (
+									<a
+										href={note.link}
+										className='mr-10 lite-shadow'
+										key={i}
+										style={{ textAlign: "center" }}
+										title={note.name}
+									>
+										{note.name}
+									</a>
+								))}
+							</div>
 						</div>
-					</div>
+					) : null}
 				</div>
 			</div>
 		</div>

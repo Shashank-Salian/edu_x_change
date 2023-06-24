@@ -49,6 +49,8 @@ def get_post_data(post, user):
 	    post.upvotes_users.filter(username=user.username).exists(),
 	    'downvoted':
 	    post.downvotes_users.filter(username=user.username).exists(),
+	    'communityModerator':
+	    post.community.moderator.username,
 	    'notes': [{
 	        'name':
 	        f'{f.notes_file.name.replace("userassets/posts_files/", "")}',
@@ -91,7 +93,7 @@ def is_valid_password(password):
 def is_valid_comm_name(name):
 	if name is None:
 		return False
-	pattern = r"^\S{3,25}$"
+	pattern = r"^(?!.*[A-Z])[\w!$^*()|{}.+_\-\[\]@]{3,25}$"
 	return re.match(pattern, name) is not None
 
 
@@ -109,15 +111,19 @@ def is_valid_post_body(body):
 	return re.match(pattern, body) is not None
 
 
-def is_valid_image(img, no_size=False):
+def is_valid_image(img, no_size=False, gif=False):
 	if img is None:
 		return False
 	if not no_size and img.size > (1024 * 1024):
 		return False
 
+	allowed = ["PNG", "JPEG", "JPG", "WEBP"]
+	if gif:
+		allowed.append("GIF")
+
 	try:
 		fmt = Image.open(img.file).format
-		if fmt in ["PNG", "JPEG", "JPG", "WEBP"]:
+		if fmt in allowed:
 			logger.debug("Valid Image")
 			return True
 	except Exception as e:

@@ -20,7 +20,7 @@ class UsersManager(BaseUserManager):
 		                         **extra_fields)
 		if user.user_exists(user.username):
 			raise AlreadyExistException(
-			    f'User with "{self.username}" username already exist',
+			    f'User with "{user.username}" username already exist',
 			    "USERNAME_TAKEN")
 		user.password = make_password(password, salt=username)
 		user.save()

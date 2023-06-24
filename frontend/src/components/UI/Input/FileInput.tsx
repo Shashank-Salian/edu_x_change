@@ -3,7 +3,6 @@ import { JSX, ComponentChild } from "preact";
 import Upload from "@/assets/icons/Upload";
 import classes from "./FileInput.module.css";
 import AddPicture from "@/assets/icons/AddPicture";
-import { useEffect } from "preact/hooks";
 
 type Props = {
 	className?: string;
@@ -22,9 +21,6 @@ type Props = {
 };
 
 const FileInput = (props: Props) => {
-	useEffect(() => {
-		console.log("first");
-	});
 	return (
 		<div className={`${classes.container} ${props.className || ""}`}>
 			{!props.image ? (

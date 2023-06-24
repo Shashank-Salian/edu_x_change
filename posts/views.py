@@ -208,6 +208,31 @@ def save(req: HttpRequest):
 	return JsonResponse(resp, status=500)
 
 
+def delete(req: HttpRequest, p_id: int):
+	if not req.user.is_active:
+		resp = error_resp_data(
+		    NotAuthorizedException("Not authorized to delete a post"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		p = Posts.objects.get(id=p_id)
+		if req.user.username == p.created_user.username or p.community.moderator.username == req.user.username:
+			p.delete()
+			resp = success_resp_data("Post deleted successfully")
+			return JsonResponse(resp)
+		resp = error_resp_data(
+		    NotAuthorizedException(
+		        "Only the post creator or moderator can delete the post"))
+		return JsonResponse(resp, status=401)
+	except Posts.DoesNotExist:
+		resp = error_resp_data(DoesNotExistException("Post does not exist"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
 def notes_view(req: HttpRequest, p_id: int, f_id: int):
 	if not req.user.is_active:
 		resp = error_resp_data(
@@ -351,10 +376,10 @@ class ImageView(View):
 
 		img = req.FILES.get('image')
 
-		if not is_valid_image(img, True):
+		if not is_valid_image(img, no_size=True, gif=True):
 			resp = error_resp_data(
 			    ValidationException(
-			        "Invalid image, only JPG, PNG, webp formats are allowed",
+			        "Invalid image, only JPG, PNG, webp, GIF formats are allowed",
 			        "INVALID_IMAGE"))
 			return JsonResponse(resp, status=406)
 

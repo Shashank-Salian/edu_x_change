@@ -17,9 +17,9 @@ type Props = {
 const Card = (props: Props) => {
 	return (
 		<div
-			className={`drop-shadow ${classes.container} ${
-				!props.heading ? classes.pad : ""
-			} ${props.className || ""}`}
+			className={`drop-shadow mt-20 mr-40 mb-20 ml-20 ${classes.container} ${
+				props.className || ""
+			}`}
 		>
 			{props.heading ? (
 				<div className={`${classes.heading}`}>

@@ -10,65 +10,77 @@ import { TargetedEvent } from "preact/compat";
 
 type Props = {};
 
+type InpData = {
+	id: string;
+	type: string;
+	isValid: () => boolean;
+	value: string;
+	placeholder: string;
+};
+
 const LoginForm = (_props: Props) => {
-	const [isSignupForm, setIsSignupForm] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
-	const [signupData, setSignupData] = useState([
+	const initSignUpData: InpData[] = [
 		{
 			id: "signupName",
 			type: "text",
-			isValid: () => signupData[0].value.length >= 2,
+			isValid: () => initSignUpData[0].value.length >= 2,
 			value: "",
 			placeholder: "Name",
 		},
 		{
 			id: "signupEmail",
 			type: "email",
-			isValid: () => isValidEmail(signupData[1].value),
+			isValid: () => isValidEmail(initSignUpData[1].value),
 			value: "",
 			placeholder: "Email",
 		},
 		{
 			id: "signupUsername",
 			type: "text",
-			isValid: () => isValidUsername(signupData[2].value),
+			isValid: () => isValidUsername(initSignUpData[2].value),
 			value: "",
 			placeholder: "Username",
 		},
 		{
 			id: "signupPassword",
 			type: "password",
-			isValid: () => signupData[3].value.length >= 8,
+			isValid: () => initSignUpData[3].value.length >= 8,
 			value: "",
 			placeholder: "Password",
 		},
 		{
 			id: "signupConfirmPassword",
 			type: "password",
-			isValid: () => signupData[4].value === signupData[3].value,
+			isValid: () => initSignUpData[4].value === initSignUpData[3].value,
 			value: "",
 			placeholder: "Confirm password",
 		},
-	]);
+	];
 
-	const [signinData, setSigninData] = useState([
+	const initSignInData: InpData[] = [
 		{
 			id: "loginUsername",
 			type: "text",
 			isValid: () =>
-				isValidEmail(signinData[0].value) ||
-				isValidUsername(signinData[0].value),
+				isValidEmail(initSignInData[0].value) ||
+				isValidUsername(initSignInData[0].value),
 			value: "",
 			placeholder: "Username or Email",
 		},
 		{
 			id: "loginPassword",
 			type: "password",
-			isValid: () => signinData[1].value.length >= 8,
+			isValid: () => initSignInData[1].value.length >= 8,
 			value: "",
 			placeholder: "Password",
 		},
-	]);
+	];
+
+	const [isSignupForm, setIsSignupForm] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [signupData, setSignupData] = useState(initSignUpData);
+
+	const [signinData, setSigninData] = useState(initSignInData);
 
 	const [messageData, setMessageData] = useState<{
 		message: string;
@@ -100,7 +112,7 @@ const LoginForm = (_props: Props) => {
 			newData[i].value = e.currentTarget.value;
 			return newData;
 		});
-		console.log(signinData[i].value)
+		console.log(signinData[i].value);
 	};
 
 	/**
@@ -131,6 +143,9 @@ const LoginForm = (_props: Props) => {
 					message: res.message,
 					type: "success",
 				});
+				setIsSignupForm(false);
+				setSignupData(initSignUpData);
+				setSigninData(initSignInData);
 				return;
 			}
 
@@ -167,6 +182,7 @@ const LoginForm = (_props: Props) => {
 					message: res.message,
 					type: "success",
 				});
+				location.pathname = "/";
 				return;
 			}
 			setMessageData({

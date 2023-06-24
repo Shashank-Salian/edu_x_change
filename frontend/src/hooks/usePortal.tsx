@@ -11,6 +11,11 @@ const usePortal = (comp: ComponentChild | null, props: Props) => {
 	useEffect(() => {
 		if (!props.show) return;
 
+		const e = document.getElementById("portal");
+		if (e) {
+			document.body.removeChild(e);
+		}
+
 		const ele = document.createElement("div");
 		ele.id = "portal";
 		document.body.appendChild(ele);

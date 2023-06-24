@@ -1,0 +1,14 @@
+.container {
+	list-style-type: none;
+}
+
+.item {
+	border-bottom: 1px solid var(--black);
+	font-weight: 600;
+	padding: 12px 8px;
+	text-align: center;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	cursor: pointer;
+}

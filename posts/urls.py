@@ -5,6 +5,7 @@ urlpatterns = [
     path('recent/', views.recent, name="recent"),
     path('save/', views.save),
     path('draft/', views.Draft.as_view(), name="draft"),
+    path('delete/<int:p_id>/', views.delete, name="delete"),
     path('notes/<int:p_id>/<int:f_id>/', views.notes_view),
     path('upvote/<int:p_id>/', views.upvote),
     path('downvote/<int:p_id>/', views.downvote),
