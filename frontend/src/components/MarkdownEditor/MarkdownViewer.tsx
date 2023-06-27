@@ -15,6 +15,7 @@ type Props = {
 	className?: string;
 	onUpvoteClick?: JSX.MouseEventHandler<HTMLDivElement>;
 	onDownvoteClick?: JSX.MouseEventHandler<HTMLDivElement>;
+	isReply?: boolean;
 };
 
 const MarkdownViewer = ({ postData, ...props }: Props) => {
@@ -48,7 +49,9 @@ const MarkdownViewer = ({ postData, ...props }: Props) => {
 					</div>
 				</div>
 				<div style={{ width: "100%" }}>
-					<h1 className={`mb-30`}>{postData.title}</h1>
+					{!props.isReply ? (
+						<h1 className={`mb-30`}>{postData.title}</h1>
+					) : null}
 					<div ref={viewerElRef}></div>
 					{postData.notes.length > 0 ? (
 						<div>

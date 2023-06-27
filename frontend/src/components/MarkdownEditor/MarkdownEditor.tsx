@@ -15,6 +15,7 @@ type Props = {
 	onInput?: (editorType: "wysiwyg" | "markdown") => void;
 	onImageInput?: (blob: Blob | File, callback: Function) => void;
 	onCaretChange?: (editorType: "wysiwyg" | "markdown") => void;
+	autofocus?: boolean;
 };
 
 const MarkdownEditor = (props: Props) => {
@@ -36,6 +37,7 @@ const MarkdownEditor = (props: Props) => {
 					if (props.onCaretChange) props.onCaretChange(e);
 				},
 			},
+			autofocus: props.autofocus,
 		});
 
 		if (props.onImageInput) {

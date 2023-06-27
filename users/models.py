@@ -22,6 +22,8 @@ class UsersManager(BaseUserManager):
 			raise AlreadyExistException(
 			    f'User with "{user.username}" username already exist',
 			    "USERNAME_TAKEN")
+		if not is_valid_password(password):
+			raise ValidationException("Invalid password")
 		user.password = make_password(password, salt=username)
 		user.save()
 		user.set_basic_perms()
@@ -51,6 +53,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
 	password = models.CharField(max_length=100)
 	email = models.EmailField(max_length=50)
 	created_time = models.DateTimeField(auto_now_add=True)
+	avatar = models.SmallIntegerField(default=1)
 
 	is_staff = models.BooleanField(default=False)
 	is_superuser = models.BooleanField(default=False)
@@ -66,8 +69,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
 
 	def validate_user(self):
 		if is_valid_name(self.name) and is_valid_email(
-		    self.email) and is_valid_password(
-		        self.password) and is_valid_username(self.username):
+		    self.email) and is_valid_username(self.username):
 			return True
 		raise ValidationException("Some fields submitted were invalid!",
 		                          "INVALID_FIELD")

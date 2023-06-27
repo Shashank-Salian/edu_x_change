@@ -13,8 +13,7 @@ import List from "../UI/List/List";
 
 type Props = {
 	postData: PostData;
-	communityName: string;
-	communityIcon: string;
+	isReply?: boolean;
 };
 
 declare const __userData: UserData;
@@ -46,7 +45,49 @@ const PostView = ({ postData, ...props }: Props) => {
 		}
 	};
 
-	const listItems: ListItem = [{ name: "Save Post" }];
+	const onSaveClick = async () => {
+		try {
+			const rawData = await request(`/api/posts/savepost/${postData.id}/`);
+			const data = await rawData.json();
+			if (data.ok) {
+				setPostDataState(data.data);
+				alert(data.message);
+				return;
+			}
+
+			alert(data.message);
+		} catch (err) {
+			console.log(err);
+			alert("Something went wrong while saving post!");
+		}
+	};
+
+	const onRemoveSavedClick = async () => {
+		try {
+			const rawData = await request(
+				`/api/posts/removesaved/${postDataState.id}/`
+			);
+			const data = await rawData.json();
+
+			if (data.ok) {
+				alert(data.message);
+				location.reload();
+				return;
+			}
+
+			alert(data.message);
+		} catch (err) {
+			console.log(err);
+			alert("Something went wrong!");
+		}
+	};
+
+	const listItems: ListItem = [
+		{
+			name: `${postDataState.saved ? "Remove saved" : "Save"} Post`,
+			onClick: postDataState.saved ? onRemoveSavedClick : onSaveClick,
+		},
+	];
 
 	if (
 		__userData?.username === postDataState.createdUser ||
@@ -89,12 +130,12 @@ const PostView = ({ postData, ...props }: Props) => {
 			<div className={`${classes.head} lite-shadow`}>
 				<div className={`flx-c`}>
 					<img
-						src={props.communityIcon}
-						alt={props.communityName}
+						src={`/api/community/icon/${postDataState.community}`}
+						alt={postDataState.community}
 						className={`mr-20 lite-shadow ${classes.icon}`}
 					/>
-					<a href={`/x/${props.communityName}/`} className={`underline`}>
-						x/{props.communityName}
+					<a href={`/x/${postDataState.community}/`} className={`underline`}>
+						x/{postDataState.community}
 					</a>
 					<span>&nbsp;posted by&nbsp;</span>
 					<span className={classes.userName}>
@@ -110,6 +151,7 @@ const PostView = ({ postData, ...props }: Props) => {
 				postData={postDataState}
 				onDownvoteClick={() => onVoteClick("downvote")}
 				onUpvoteClick={() => onVoteClick("upvote")}
+				isReply={props.isReply}
 			/>
 		</div>
 	);

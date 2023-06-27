@@ -13,7 +13,7 @@ from posts.models import Posts
 logger = get_logger(__name__)
 
 
-def get_comm_data(com: Community):
+def get_comm_data(com: Community, user):
 	data = {
 	    'id': com.id,
 	    'name': com.name,
@@ -23,6 +23,7 @@ def get_comm_data(com: Community):
 	    'createdDate': format_date(com.created_time),
 	    'iconPath': format_com_icon_url(com.name),
 	    'participantsCount': com.participants.count(),
+	    'userJoined': com.user_exists(user.username)
 	}
 
 	return data
@@ -37,15 +38,13 @@ def comm_page(req: HttpRequest, c_name: str):
 
 	try:
 		com = Community.objects.get(name=c_name)
-		comm_data = get_comm_data(com)
+		comm_data = get_comm_data(com, req.user)
 
-		comm_data.setdefault('userJoined', com.user_exists(req.user.username))
-
-		return HttpResponse(
-		    render_and_minify("x/index.html", {
-		        "comm_data": comm_data,
-		        "user_data": get_user_data(req.user)
-		    }))
+		return render(
+		    req, "x/index.html", {
+		        "comm_data": json.dumps(comm_data),
+		        "user_data": json.dumps(get_user_data(req.user))
+		    })
 	except Community.DoesNotExist:
 		return redirect('/404/', status=404)
 	except Exception as e:
@@ -149,14 +148,15 @@ def search(req: HttpRequest, query: str):
 			com_res = Community.objects.filter(name__icontains=query).exclude(
 			    name__istartswith=query)[:10]
 			final_comm.extend(com_res)
-		if len(final_comm) <= 2:
+		if len(final_comm) <= 20:
 			com_res = Community.objects.filter(
 			    topic__istartswith=query).exclude(
 			        name__istartswith=query).exclude(
 			            name__icontains=query)[:10]
 			final_comm.extend(com_res)
-		resp = success_resp_data("Communities found",
-		                         data=[get_comm_data(c) for c in final_comm])
+		resp = success_resp_data(
+		    "Communities found",
+		    data=[get_comm_data(c, req.user) for c in final_comm])
 		return JsonResponse(resp)
 	except Community.DoesNotExist:
 		resp = success_resp_data("No such community", data=[])
@@ -228,7 +228,7 @@ def my_communities(req: HttpRequest):
 
 		communities = []
 		for com in comm_raw:
-			communities.append(get_comm_data(com))
+			communities.append(get_comm_data(com, req.user))
 
 		logger.debug(communities)
 		resp = success_resp_data("Communities retrieved successfully",
@@ -250,7 +250,7 @@ def comm_posts(req: HttpRequest, c_name: str):
 	try:
 		raw_posts = Posts.objects.filter(
 		    community__name=c_name,
-		    is_drafted=False).order_by('created_time').reverse()
+		    is_drafted=False, reply_to=None).order_by('created_time').reverse()
 		posts = []
 
 		for p in raw_posts:

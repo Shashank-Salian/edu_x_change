@@ -3,7 +3,6 @@ import re
 from PIL import Image, UnidentifiedImageError
 
 from django.template import loader
-from minify_html_onepass import minify
 
 import logging
 
@@ -24,6 +23,7 @@ def get_user_data(user):
 	    'is_active': user.is_active,
 	    'is_staff': user.is_staff,
 	    'is_superuser': user.is_superuser,
+	    'avatar': format_user_icon_url(user.avatar)
 	}
 
 
@@ -32,7 +32,7 @@ def get_post_data(post, user):
 	    'id':
 	    post.id,
 	    'title':
-	    post.title,
+	    post.title if post.title else None,
 	    'body':
 	    post.body,
 	    'community':
@@ -55,13 +55,10 @@ def get_post_data(post, user):
 	        'name':
 	        f'{f.notes_file.name.replace("userassets/posts_files/", "")}',
 	        'link': f"/api/posts/notes/{post.id}/{f.id}"
-	    } for f in post.files.exclude(notes_file_name=None)]
+	    } for f in post.files.exclude(notes_file_name=None)],
+	    'saved':
+	    post.saved_by.filter(id=user.id).exists()
 	}
-
-
-def render_and_minify(template, data={}):
-	html = loader.render_to_string(template, data)
-	return minify(html, minify_css=True, minify_js=True)
 
 
 def is_valid_email(email):
@@ -172,6 +169,10 @@ def format_com_icon_url(name):
 
 def format_post_imgs(name):
 	return f"/api/posts/image/{name}"
+
+
+def format_user_icon_url(num):
+	return f'/static/imgs/p{num}.jpg'
 
 
 def is_valid_pdf(file):

@@ -39,12 +39,7 @@ const HomePage = () => {
 				<h2>Home</h2>
 
 				{posts.map((post, i) => (
-					<PostView
-						postData={post}
-						communityIcon={`/api/community/icon/${post.community}/`}
-						communityName={post.community}
-						key={i}
-					/>
+					<PostView postData={post} key={i} />
 				))}
 			</div>
 		</div>

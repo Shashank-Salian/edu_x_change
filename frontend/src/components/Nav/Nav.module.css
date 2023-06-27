@@ -17,3 +17,26 @@
 .searchContainer {
 	width: 33.3%;
 }
+
+.buttons {
+	display: flex;
+	align-items: center;
+}
+
+.iconContainer {
+	display: flex;
+	cursor: pointer;
+	position: relative;
+}
+
+.iconContainer img {
+	border-radius: 50%;
+}
+
+.iconOptions {
+	position: absolute;
+	right: 0;
+	background-color: var(--creme);
+	border-radius: 8px;
+	min-width: 180px;
+}

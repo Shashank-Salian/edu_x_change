@@ -12,13 +12,17 @@ type Props = {
 	children?: ComponentChild;
 	className?: string;
 	onIconClick?: JSX.MouseEventHandler<HTMLDivElement>;
+	noMargin?: boolean;
+	color?: "yellow" | "red" | "orange" | "transp" | "blue";
 };
 
 const Card = (props: Props) => {
 	return (
 		<div
-			className={`drop-shadow mt-20 mr-40 mb-20 ml-20 ${classes.container} ${
-				props.className || ""
+			className={`${props.noShadow ? "" : `drop-shadow`} ${
+				props.noMargin ? "" : `mt-20 mr-40 mb-20 ml-20`
+			} ${classes.container} ${props.className || ""} ${
+				props.color ? classes[props.color] : ""
 			}`}
 		>
 			{props.heading ? (

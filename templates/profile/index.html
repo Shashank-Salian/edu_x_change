@@ -1,7 +1,7 @@
 {% extends 'basic.html' %} {% load static %} 
 {% load django_vite %}
 {% block head %}
-<title>Edu X Change</title>
+<title>My profile</title>
 {% endblock head %}
 {% block body %}
 <div id="root"></div>
@@ -12,5 +12,5 @@
 		const __userData = {{ user_data|safe }}
 		{% endif %}
 	</script>
-	{% vite_asset 'pages/home/home.tsx' %}
+	{% vite_asset 'pages/profile/profile.tsx' %}
 {% endblock scripts %}

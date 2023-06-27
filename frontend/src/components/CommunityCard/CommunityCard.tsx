@@ -60,13 +60,7 @@ const CommunityCard = ({ data }: Props) => {
 						</h1>
 					)
 				) : (
-					postData.map((post) => (
-						<PostView
-							postData={post}
-							communityName={data.name}
-							communityIcon={data.iconPath}
-						/>
-					))
+					postData.map((post) => <PostView postData={post} key={post.id} />)
 				)}
 			</div>
 		</div>

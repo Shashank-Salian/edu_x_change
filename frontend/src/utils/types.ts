@@ -23,6 +23,7 @@ interface PostData {
 	downvoted: boolean;
 	notes: { name: string; link: string }[];
 	communityModerator: string;
+	saved: boolean;
 }
 
 interface UserData {
@@ -34,6 +35,7 @@ interface UserData {
 	isSuperuser: boolean;
 	isStaff: boolean;
 	isActive: boolean;
+	avatar: string;
 }
 
 export type { CommunityData, PostData, UserData };

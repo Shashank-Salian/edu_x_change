@@ -37,6 +37,10 @@ class Posts(Model):
 	                                  related_name='posts_saved')
 
 	is_drafted = models.BooleanField(default=False)
+	reply_to = models.ForeignKey("self",
+	                             on_delete=models.CASCADE,
+	                             default=None,
+	                             null=True)
 
 	def validate_post(self):
 		if self.created_user is None:

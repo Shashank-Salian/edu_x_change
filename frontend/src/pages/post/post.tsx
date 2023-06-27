@@ -171,7 +171,9 @@ const Post = () => {
 			}
 		};
 
-		sendImg();
+		sendImg().catch(() => {
+			alert("Something went wrong while uploading image");
+		});
 	};
 
 	const onNotesInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {

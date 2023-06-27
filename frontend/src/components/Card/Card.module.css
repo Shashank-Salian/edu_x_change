@@ -20,7 +20,6 @@
 	align-items: center;
 	justify-content: space-between;
 	position: relative;
-	background-color: var(--creme);
 	z-index: 10;
 }
 
@@ -48,4 +47,24 @@
 .body::-webkit-scrollbar-thumb {
 	background-color: #817c59;
 	border-radius: 4px;
+}
+
+.yellow {
+	background-color: var(--yellow);
+}
+
+.orange {
+	background-color: var(--orange);
+}
+
+.blue {
+	background-color: var(--blue);
+}
+
+.red {
+	background-color: var(--red);
+}
+
+.transp {
+	background-color: transparent;
 }

@@ -44,6 +44,8 @@ function debounce(cb: (...args: any[]) => void, delay = 1000) {
 	};
 }
 
+const avatars = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
 export {
 	request,
 	isValidEmail,
@@ -51,4 +53,5 @@ export {
 	getCookie,
 	debounce,
 	isValidCommunityName,
+	avatars,
 };

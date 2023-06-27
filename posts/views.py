@@ -16,6 +16,7 @@ def create_post_and_respond(user,
                             community=None,
                             body=None,
                             is_drafted=True,
+                            reply_to=None,
                             files=[]):
 	"""
 	Create a new post and responds with a JSON object.
@@ -28,8 +29,9 @@ def create_post_and_respond(user,
 		p = Posts(title=title,
 		          community=community,
 		          body=body,
-		          is_drafted=True,
-		          created_user=user)
+		          is_drafted=is_drafted,
+		          created_user=user,
+		          reply_to=reply_to)
 		p.validate_post()
 		p.save()
 
@@ -57,8 +59,8 @@ def recent(req: HttpRequest):
 
 	try:
 		raw_posts = Posts.objects.filter(
-		    community__participants=req.user,
-		    is_drafted=False).order_by('created_time').reverse()
+		    community__participants=req.user, is_drafted=False,
+		    reply_to=None).order_by('created_time').reverse()
 		posts = []
 
 		for p in raw_posts:
@@ -78,7 +80,7 @@ def upvote(req: HttpRequest, p_id):
 		return JsonResponse(resp, status=401)
 
 	try:
-		p = Posts.objects.get(id=p_id)
+		p = Posts.objects.get(id=p_id, is_drafted=False)
 
 		if p.upvotes_users.filter(username=req.user.username).exists():
 			p.upvotes_users.remove(req.user)
@@ -107,7 +109,7 @@ def downvote(req: HttpRequest, p_id):
 		return JsonResponse(resp, status=401)
 
 	try:
-		p = Posts.objects.get(id=p_id)
+		p = Posts.objects.get(id=p_id, is_drafted=False)
 
 		if p.downvotes_users.filter(username=req.user.username).exists():
 			p.downvotes_users.remove(req.user)
@@ -172,7 +174,9 @@ def save(req: HttpRequest):
 
 	# Create the post
 	try:
-		drafted = Posts.objects.get(created_user=req.user, is_drafted=True)
+		drafted = Posts.objects.get(created_user=req.user,
+		                            is_drafted=True,
+		                            reply_to=None)
 		drafted.title = title
 		drafted.body = body
 		drafted.community = community
@@ -215,7 +219,7 @@ def delete(req: HttpRequest, p_id: int):
 		return JsonResponse(resp, status=401)
 
 	try:
-		p = Posts.objects.get(id=p_id)
+		p = Posts.objects.get(id=p_id, is_drafted=False)
 		if req.user.username == p.created_user.username or p.community.moderator.username == req.user.username:
 			p.delete()
 			resp = success_resp_data("Post deleted successfully")
@@ -229,6 +233,65 @@ def delete(req: HttpRequest, p_id: int):
 		return JsonResponse(resp, status=404)
 	except Exception as e:
 		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def save_post(req: HttpRequest, p_id: int):
+	if not req.user.is_active:
+		resp = error_resp_data(NotAuthorizedException("Login to save posts"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		p = Posts.objects.get(id=p_id, is_drafted=False)
+		p.saved_by.add(req.user)
+		resp = success_resp_data("Post saved successfully",
+		                         data=get_post_data(p, req.user))
+		return JsonResponse(resp)
+	except Posts.DoesNotExist:
+		resp = error_resp_data(DoesNotExistException("Post does not exist"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.debug(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def saved_posts(req: HttpRequest):
+	if not req.user.is_active:
+		resp = error_resp_data(NotAuthorizedException("Login to save posts"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		posts = req.user.posts_saved.all().order_by('created_time').reverse()
+		res_posts = []
+		for post in posts:
+			res_posts.append(get_post_data(post, req.user))
+		resp = success_resp_data("Retrieved saved posts successfully.",
+		                         data=res_posts)
+		return JsonResponse(resp)
+	except Exception as e:
+		logger.debug(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def remove_saved(req: HttpRequest, p_id: int):
+	if not req.user.is_active:
+		resp = error_resp_data(
+		    NotAuthorizedException("Login to save or remove posts"))
+		return JsonResponse(resp, status=401)
+
+	try:
+		post = Posts.objects.get(id=p_id)
+		post.saved_by.remove(req.user)
+		resp = success_resp_data("Post removed from saved successfully")
+		return JsonResponse(resp)
+	except Posts.DoesNotExist:
+		resp = error_resp_data(DoesNotExistException("Post does not exists!"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.debug(e)
 		resp = error_resp_data(ServerException())
 		return JsonResponse(resp, status=500)
 
@@ -261,15 +324,104 @@ def notes_view(req: HttpRequest, p_id: int, f_id: int):
 		return JsonResponse(resp, status=500)
 
 
+class Reply(View):
+
+	def get(self, req: HttpRequest, p_id: int):
+		if not req.user.is_active:
+			resp = error_resp_data(NotAuthorizedException("Login to reply"))
+			return JsonResponse(resp, status=401)
+
+		try:
+			replies = []
+			raw_replies = Posts.objects.filter(
+			    reply_to=p_id,
+			    is_drafted=False).order_by('created_time').reverse()
+			for r in raw_replies:
+				replies.append(get_post_data(r, req.user))
+			resp = success_resp_data("Retrieved post successfully",
+			                         data=replies)
+			return JsonResponse(resp)
+		except Posts.DoesNotExist:
+			resp = error_resp_data(
+			    DoesNotExistException("Post does not exist"))
+			return JsonResponse(resp, status=404)
+		except Exception as e:
+			logger.debug(e)
+			resp = error_resp_data(ServerException())
+			return JsonResponse(resp, status=500)
+
+	def post(self, req: HttpRequest, p_id: int):
+		if not req.user.is_active:
+			resp = error_resp_data(NotAuthorizedException("Login to reply"))
+			return JsonResponse(resp, status=401)
+
+		body = req.POST.get('body')
+		notes = req.FILES.getlist('notes', [])
+
+		if not is_valid_post_body(body):
+			resp = error_resp_data(ValidationException("Invalid post body"))
+			return JsonResponse(resp, status=406)
+
+		for note in notes:
+			if not is_valid_pdf(note):
+				resp = error_resp_data(
+				    InvalidFileException(
+				        "Enter valid PDF file and size should be less than 10MB"
+				    ))
+				return JsonResponse(resp, status=406)
+
+		replying_post = None
+
+		try:
+			replying_post = Posts.objects.get(id=p_id, reply_to=None)
+		except Posts.DoesNotExist:
+			resp = error_resp_data(
+			    DoesNotExistException("Post does not exist"))
+			return JsonResponse(resp, status=404)
+
+		try:
+			r = Posts.objects.get(created_user=req.user,
+			                      reply_to=replying_post,
+			                      is_drafted=True)
+			r.is_drafted = False
+			r.body = body
+			r.save()
+
+			for file in notes:
+				f_name = f"{time.time()}_{r.id}_{file.name}"
+				f_store = PostsFilesStore(notes_file=file,
+				                          notes_file_name=f_name)
+				f_store.save()
+				r.files.add(f_store)
+			resp = success_resp_data("Post replied successfully")
+			return JsonResponse(resp)
+		except Posts.DoesNotExist:
+			resp = error_resp_data(
+			    DoesNotExistException("Post does not exist"))
+			return JsonResponse(resp, status=404)
+		except Exception as e:
+			logger.debug(e)
+			resp = error_resp_data(ServerException())
+			return JsonResponse(resp, status=500)
+
+
 class Draft(View):
 
-	def get(self, req: HttpRequest):
+	def get(self, req: HttpRequest, p_id=None):
 		if not req.user.is_active:
 			return JsonResponse(
 			    error_resp_data(NotAuthorizedException("Not authorized")))
 
 		try:
-			posts = Posts.objects.get(created_user=req.user, is_drafted=True)
+			posts = None
+			if p_id:
+				posts = Posts.objects.get(created_user=req.user,
+				                          is_drafted=True,
+				                          reply_to=p_id)
+			else:
+				posts = Posts.objects.get(created_user=req.user,
+				                          is_drafted=True)
+
 			posts_info = {
 			    'id': posts.id,
 			    'title': posts.title,
@@ -300,6 +452,18 @@ class Draft(View):
 		title = req.POST.get('title')
 		comm_name = req.POST.get('community')
 		body = req.POST.get('body')
+		reply_to = int(
+		    req.POST.get('replyTo')) if req.POST.get('replyTo') else None
+
+		if reply_to:
+			try:
+				reply_to = Posts.objects.get(id=reply_to, reply_to=None)
+				comm_name = reply_to.community.name
+			except Posts.DoesNotExist:
+				resp = error_resp_data(
+				    DoesNotExistException(
+				        "Replying to post that does not exist"))
+				return JsonResponse(resp, status=404)
 
 		community = None
 
@@ -318,9 +482,11 @@ class Draft(View):
 				return JsonResponse(resp, status=404)
 
 		try:
-			dp = Posts.objects.get(created_user=req.user, is_drafted=True)
+			dp = Posts.objects.get(created_user=req.user,
+			                       is_drafted=True,
+			                       reply_to=reply_to)
 
-			if title is not None:
+			if title is not None and reply_to is None:
 				dp.title = title
 			if community is not None:
 				dp.community = community
@@ -335,7 +501,8 @@ class Draft(View):
 			                               title=title,
 			                               community=community,
 			                               body=body,
-			                               is_drafted=True)
+			                               is_drafted=True,
+			                               reply_to=reply_to)
 		except ValidationException as e:
 			resp = error_resp_data(e)
 			return JsonResponse(resp, status=406)
@@ -375,6 +542,8 @@ class ImageView(View):
 			return JsonResponse(resp, status=401)
 
 		img = req.FILES.get('image')
+		reply_to = int(
+		    req.POST.get('replyTo')) if req.POST.get('replyTo') else None
 
 		if not is_valid_image(img, no_size=True, gif=True):
 			resp = error_resp_data(
@@ -383,9 +552,20 @@ class ImageView(View):
 			        "INVALID_IMAGE"))
 			return JsonResponse(resp, status=406)
 
+		if reply_to:
+			try:
+				reply_to = Posts.objects.get(id=reply_to, reply_to=None)
+				comm_name = reply_to.community.name
+			except Posts.DoesNotExist:
+				resp = error_resp_data(
+				    DoesNotExistException(
+				        "Replying to post that does not exist"))
+				return JsonResponse(resp, status=404)
+
 		try:
 			drafted_post = Posts.objects.get(created_user=req.user,
-			                                 is_drafted=True)
+			                                 is_drafted=True,
+			                                 reply_to=reply_to)
 			img_name = img.name.replace(" ", "")
 			img_name = f"{time.time()}_{drafted_post.id}_{img_name}"
 
