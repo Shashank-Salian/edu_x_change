@@ -4,6 +4,11 @@
 	max-height: 80vh;
 	border-radius: 8px;
 	position: relative;
+	max-width: 600px;
+}
+
+.fw {
+	width: 100vw;
 }
 
 .pad {

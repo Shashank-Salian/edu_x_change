@@ -3,6 +3,7 @@ import Input from "./Input";
 
 import classes from "./SearchInput.module.css";
 import { CommunityData } from "@/utils/types";
+import ProfileList from "../List/ProfileList";
 
 type Props = {
 	className?: string;
@@ -31,37 +32,22 @@ const SearchInput = (props: Props) => {
 			{props.value !== "" &&
 			props.suggestions &&
 			props.suggestions.length === 0 ? (
-				<ul className={`drop-shadow ${classes.listContainer}`}>
-					<li className={classes.list}>No results</li>
-				</ul>
+				<ProfileList
+					items={[{ name: "No results" }]}
+					className={`${classes.listContainer}`}
+				/>
 			) : null}
 			{props.suggestions && props.suggestions.length > 0 ? (
-				<ul className={`drop-shadow ${classes.listContainer}`}>
-					{props.suggestions?.map((item, i) => (
-						<li key={i}>
-							<a
-								href={`/x/${item.name}`}
-								className={`mb-10 mt-10 ${classes.list}`}
-							>
-								<div className={classes.lhs}>
-									<img
-										src={item.iconPath}
-										alt={item.name}
-										width={"40px"}
-										height={"40px"}
-										className={`mr-10 ${classes.icon}`}
-									/>
-									<div className={classes.nameContainer}>
-										<span className={classes.name}>{item.name}</span>
-										<span className={classes.desc}>{item.topic}</span>
-									</div>
-								</div>
-								<span>{item.participantsCount}</span>
-							</a>
-							<hr />
-						</li>
-					))}
-				</ul>
+				<ProfileList
+					items={props.suggestions.map((item) => ({
+						name: item.name,
+						link: `/x/${item.name}`,
+						rhs: item.participantsCount,
+						icon: item.iconPath,
+						desc: item.topic,
+					}))}
+					className={`drop-shadow ${classes.listContainer}`}
+				/>
 			) : null}
 		</div>
 	);

@@ -28,8 +28,6 @@ const MarkdownViewer = ({ postData, ...props }: Props) => {
 			initialValue: postData.body,
 			plugins: [[codeSyntaxHighlight, { highlighter: Prism }]],
 		});
-
-		console.log(postData.notes);
 	}, []);
 
 	return (
@@ -50,7 +48,9 @@ const MarkdownViewer = ({ postData, ...props }: Props) => {
 				</div>
 				<div style={{ width: "100%" }}>
 					{!props.isReply ? (
-						<h1 className={`mb-30`}>{postData.title}</h1>
+						<a href={`/p/${postData.id}/`} style={{ color: "var(--black)" }}>
+							<h1 className={`mb-30`}>{postData.title}</h1>
+						</a>
 					) : null}
 					<div ref={viewerElRef}></div>
 					{postData.notes.length > 0 ? (

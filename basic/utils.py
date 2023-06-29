@@ -1,7 +1,7 @@
 import re
 
 from PIL import Image, UnidentifiedImageError
-
+from django.core.mail import send_mail
 from django.template import loader
 
 import logging
@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 def get_logger(name):
 	return logging.getLogger(name)
+
+
+def send_my_email(subject, message, to):
+	return send_mail(subject, message, recipient_list=[to])
 
 
 def get_user_data(user):
@@ -140,14 +144,16 @@ def error_resp_data(err: Exception):
 	return resp
 
 
-def success_resp_data(message: str, code="OK", data=None):
+def success_resp_data(message: str, code="OK", data=None, page=None):
 	resp = {
 	    "error": False,
 	    "ok": True,
 	    "message": message,
 	    "code": code,
-	    "errorName": None
+	    "errorName": None,
 	}
+	if page:
+		resp["page"] = page
 
 	if data is not None:
 		resp["data"] = data

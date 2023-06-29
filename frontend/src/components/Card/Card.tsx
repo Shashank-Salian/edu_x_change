@@ -14,6 +14,7 @@ type Props = {
 	onIconClick?: JSX.MouseEventHandler<HTMLDivElement>;
 	noMargin?: boolean;
 	color?: "yellow" | "red" | "orange" | "transp" | "blue";
+	fw?: boolean;
 };
 
 const Card = (props: Props) => {
@@ -23,7 +24,7 @@ const Card = (props: Props) => {
 				props.noMargin ? "" : `mt-20 mr-40 mb-20 ml-20`
 			} ${classes.container} ${props.className || ""} ${
 				props.color ? classes[props.color] : ""
-			}`}
+			} ${props.fw ? classes.fw : ""}`}
 		>
 			{props.heading ? (
 				<div className={`${classes.heading}`}>

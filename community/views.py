@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import Permission
+from django.core.paginator import Paginator
 
 import json
 
@@ -175,6 +176,10 @@ def leave_community(req: HttpRequest, c_name: str):
 
 	try:
 		com = Community.objects.get(name=c_name)
+		if com.moderator.username == req.user.username:
+			resp = error_resp_data(
+			    NotAuthorizedException("You can't leave your own community"))
+			return JsonResponse(resp, status=403)
 		com.participants.remove(req.user)
 		resp = success_resp_data("Community left successfully")
 		return JsonResponse(resp)
@@ -240,6 +245,71 @@ def my_communities(req: HttpRequest):
 		return JsonResponse(resp, status=500)
 
 
+def participants(req: HttpRequest, c_name: str):
+	if not req.user.is_active:
+		err = error_resp_data(
+		    NotAuthorizedException("Log in to get my communities",
+		                           "NO_PERMISSION"))
+		return JsonResponse(err, status=403)
+
+	try:
+		p_users = Community.objects.get(name=c_name).participants.all()
+
+		resp = success_resp_data("Communities retrieved successfully",
+		                         data=[get_user_data(u) for u in p_users])
+		return JsonResponse(resp)
+	except Community.DoesNotExist:
+		resp = error_resp_data(
+		    DoesNotExistException("Community does not exists"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
+def remove_participant(req: HttpRequest, c_name: str):
+	if not req.user.is_active:
+		err = error_resp_data(
+		    NotAuthorizedException("Log in to get my communities",
+		                           "NO_PERMISSION"))
+		return JsonResponse(err, status=403)
+
+	remove_user = req.GET.get('user')
+
+	if not remove_user:
+		resp = error_resp_data(WrongMethodException())
+		return JsonResponse(resp, status=400)
+
+	try:
+		com = Community.objects.get(name=c_name)
+		if com.moderator.id != req.user.id:
+			resp = error_resp_data(
+			    NotAuthorizedException(
+			        "You don't have permission to remove participant",
+			        "NO_PERMISSION"))
+			return JsonResponse(resp, status=403)
+		user_res = com.participants.filter(username=remove_user)
+		if not user_res.exists():
+			resp = error_resp_data(
+			    DoesNotExistException("User does not exists"))
+			return JsonResponse(resp, status=404)
+		remove_user = user_res[0]
+		com.participants.remove(remove_user)
+		page = com.participants.all()
+		resp = success_resp_data("Participant removed successfully",
+		                         data=[get_user_data(p) for p in page])
+		return JsonResponse(resp)
+	except Community.DoesNotExist:
+		resp = error_resp_data(
+		    DoesNotExistException("Community does not exists"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)
+
+
 def comm_posts(req: HttpRequest, c_name: str):
 	if not req.user.is_active:
 		err = error_resp_data(
@@ -249,11 +319,19 @@ def comm_posts(req: HttpRequest, c_name: str):
 
 	try:
 		raw_posts = Posts.objects.filter(
-		    community__name=c_name,
-		    is_drafted=False, reply_to=None).order_by('created_time').reverse()
+		    community__name=c_name, is_drafted=False,
+		    reply_to=None).order_by('created_time').reverse()
+
+		page_no = int(req.GET.get('page', 1))
+		pg = Paginator(raw_posts, 15)
+		if pg.num_pages < page_no:
+			resp = success_resp_data("End of page", "END_OF_PAGE", data=[])
+			return JsonResponse(resp)
+
+		pages = pg.page(page_no)
 		posts = []
 
-		for p in raw_posts:
+		for p in pages:
 			posts.append(get_post_data(p, req.user))
 
 		resp = success_resp_data("Posts retrieved successfully", data=posts)

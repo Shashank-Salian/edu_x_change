@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import Button from "@/components/UI/Button/Button";
 import Spinner from "@/components/UI/Spinner/Spinner";
 import { debounce, request } from "@/utils/utils";
+import usePagination from "@/hooks/usePagination";
 
 declare const __postData: PostData;
 
@@ -22,7 +23,10 @@ const PostPage = () => {
 		type: "error" | "success" | "normal";
 	} | null>(null);
 	const [postReplies, setPostReplies] = useState<PostData[] | null>(null);
+	const [pauseScroll, setPauseScroll] = useState(false);
 	const editorRef = useRef<any>();
+
+	const page = useRef(1);
 
 	const onNotesInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
 		if (e.currentTarget.files && e.currentTarget.files.length > 0) {
@@ -151,27 +155,40 @@ const PostPage = () => {
 		draftPost();
 	}, 2000);
 
-	useEffect(() => {
-		const getReplies = async () => {
-			try {
-				const res = await request(`/api/posts/reply/${__postData.id}/`);
-				const data = await res.json();
+	const getReplies = async () => {
+		try {
+			setPauseScroll(true);
+			const res = await request(
+				`/api/posts/reply/${__postData.id}/?page=${page.current}`
+			);
+			const data = await res.json();
 
-				if (data.ok) {
-					setPostReplies(data.data);
+			if (data.ok) {
+				if (data.code === "END_OF_PAGE") {
+					setPauseScroll(true);
 					return;
 				}
-
-				setMessageData({
-					message: data.message,
-					type: "error",
+				setPostReplies((old) => {
+					if (old) return [...old, ...data.data];
+					return data.data;
 				});
-			} catch (err) {
-				console.error(err);
-				alert("Something went wrong while getting replies");
+				setPauseScroll(false);
+				return;
 			}
-		};
 
+			setPauseScroll(false);
+			setMessageData({
+				message: data.message,
+				type: "error",
+			});
+		} catch (err) {
+			setPauseScroll(false);
+			console.error(err);
+			alert("Something went wrong while getting replies");
+		}
+	};
+
+	useEffect(() => {
 		const getDraftedPost = async () => {
 			try {
 				const res = await request(`/api/posts/draft/${__postData.id}/`);
@@ -191,24 +208,22 @@ const PostPage = () => {
 		getDraftedPost();
 	}, []);
 
+	usePagination(
+		null,
+		100,
+		() => {
+			page.current++;
+			getReplies();
+		},
+		pauseScroll
+	);
+
 	return (
 		<div className={`main ${classes.container}`}>
 			<Nav />
 			<div className={`pad container ${classes.postContainer}`}>
 				<h2>Post :</h2>
 				<PostView postData={__postData} />
-				<h3 className={`mt-20 mb-30`}>Replies :</h3>
-				<div>
-					{postReplies === null ? (
-						<Spinner />
-					) : postReplies.length === 0 ? (
-						<h3>No replies on this post. Be the first to reply.</h3>
-					) : (
-						postReplies?.map((reply, i) => (
-							<PostView isReply postData={reply} key={i} />
-						))
-					)}
-				</div>
 
 				<h3 className={`mt-20 mb-30`}>Post a reply :</h3>
 
@@ -255,6 +270,19 @@ const PostPage = () => {
 					<Button className={`mt-40`} onClick={onReplyClick}>
 						Reply
 					</Button>
+				</div>
+
+				<h3 className={`mt-20 mb-30`}>Replies :</h3>
+				<div>
+					{postReplies === null ? (
+						<Spinner />
+					) : postReplies.length === 0 ? (
+						<h3>No replies on this post. Be the first to reply.</h3>
+					) : (
+						postReplies?.map((reply, i) => (
+							<PostView isReply postData={reply} key={i} />
+						))
+					)}
 				</div>
 			</div>
 		</div>

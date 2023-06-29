@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpRequest, JsonResponse, FileResponse
 from django.views import View
 from django.shortcuts import redirect
+from django.core.paginator import Paginator
 
 import time
 
@@ -58,12 +59,20 @@ def recent(req: HttpRequest):
 		return JsonResponse(resp, status=401)
 
 	try:
+
 		raw_posts = Posts.objects.filter(
 		    community__participants=req.user, is_drafted=False,
 		    reply_to=None).order_by('created_time').reverse()
+
+		page_no = int(req.GET.get('page', 1))
+		pg = Paginator(raw_posts, 15)
+		if pg.num_pages < page_no:
+			resp = success_resp_data("End of page", "END_OF_PAGE", data=[])
+			return JsonResponse(resp)
+
 		posts = []
 
-		for p in raw_posts:
+		for p in pg.get_page(page_no):
 			posts.append(get_post_data(p, req.user))
 		resp = success_resp_data("Posts retrieved successfully", data=posts)
 		return JsonResponse(resp)
@@ -264,8 +273,17 @@ def saved_posts(req: HttpRequest):
 
 	try:
 		posts = req.user.posts_saved.all().order_by('created_time').reverse()
+
+		page_no = int(req.GET.get('page', 1))
+		pg = Paginator(posts, 15)
+		if pg.num_pages < page_no:
+			resp = success_resp_data("End of page", "END_OF_PAGE", data=[])
+			return JsonResponse(resp)
+
+		pages = pg.page(page_no)
 		res_posts = []
-		for post in posts:
+
+		for post in pages:
 			res_posts.append(get_post_data(post, req.user))
 		resp = success_resp_data("Retrieved saved posts successfully.",
 		                         data=res_posts)
@@ -336,7 +354,16 @@ class Reply(View):
 			raw_replies = Posts.objects.filter(
 			    reply_to=p_id,
 			    is_drafted=False).order_by('created_time').reverse()
-			for r in raw_replies:
+
+			page_no = int(req.GET.get('page', 1))
+			pg = Paginator(raw_replies, 15)
+			if pg.num_pages < page_no:
+				resp = success_resp_data("End of page", "END_OF_PAGE", data=[])
+				return JsonResponse(resp)
+
+			pages = pg.page(page_no)
+
+			for r in pages:
 				replies.append(get_post_data(r, req.user))
 			resp = success_resp_data("Retrieved post successfully",
 			                         data=replies)
@@ -397,7 +424,8 @@ class Reply(View):
 			return JsonResponse(resp)
 		except Posts.DoesNotExist:
 			resp = error_resp_data(
-			    DoesNotExistException("Post does not exist"))
+			    DoesNotExistException(
+			        "Please wait till the reply get's drafted"))
 			return JsonResponse(resp, status=404)
 		except Exception as e:
 			logger.debug(e)
