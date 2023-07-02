@@ -205,6 +205,7 @@ def community_icon(req: HttpRequest, c_name: str):
 	try:
 		c = Community.objects.get(name=c_name)
 		resp = HttpResponse(c.icon_path, content_type='image/png')
+		resp['image-found'] = "true"
 		return resp
 	except Community.DoesNotExist as e:
 		resp = error_resp_data(
@@ -344,3 +345,48 @@ def comm_posts(req: HttpRequest, c_name: str):
 	except Exception as e:
 		logger.error(e)
 		return HttpResponse("Internal server error!", status=500)
+
+
+def update(req: HttpRequest, c_name: str):
+	if not req.user.is_active:
+		err = error_resp_data(
+		    NotAuthorizedException("Log in to update communities",
+		                           "NO_PERMISSION"))
+		return JsonResponse(err, status=403)
+
+	new_name = req.POST.get('communityName')
+
+	try:
+		com = Community.objects.get(name=c_name)
+		if com.moderator.id != req.user.id:
+			resp = error_resp_data(
+			    NotAuthorizedException(
+			        "You don't have permission to update community",
+			        "NO_PERMISSION"))
+			return JsonResponse(resp, status=403)
+
+		ignore_unique = True		
+		if com.name != new_name:
+			com.name = new_name
+			ignore_unique = False
+		com.description = req.POST.get('description')
+		com.topic = req.POST.get('topic')
+		
+		icon = req.FILES.get('communityIcon')
+
+		if icon:
+			com.icon_path.delete()
+			com.icon_path = icon
+
+		com.validate_community(ignore_unique=ignore_unique)
+		com.save()
+		resp = success_resp_data("Community updated successfully", data=get_comm_data(com, req.user))
+		return JsonResponse(resp)
+	except Community.DoesNotExist:
+		resp = error_resp_data(
+		    DoesNotExistException("Community does not exists"))
+		return JsonResponse(resp, status=404)
+	except Exception as e:
+		logger.error(e)
+		resp = error_resp_data(ServerException())
+		return JsonResponse(resp, status=500)

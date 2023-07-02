@@ -30,7 +30,7 @@ class Community(models.Model):
 	                              null=True,
 	                              on_delete=models.SET_NULL)
 
-	def validate_community(self):
+	def validate_community(self, ignore_unique=False):
 		if not is_valid_comm_name(
 		    self.name) or self.topic is None or len(self.topic) < 3 or len(
 		        self.topic) > 25 or len(self.description) > 500:
@@ -43,7 +43,7 @@ class Community(models.Model):
 			    "Image should be a valid PNG, JPG and size should be less than 1MB",
 			    "INVALID_IMAGE")
 
-		if self.community_exists(self.name):
+		if not ignore_unique and self.community_exists(self.name):
 			raise AlreadyExistException(
 			    f'Community with name "{self.name}" already exists',
 			    "COMMUNITY_NAME_TAKEN")

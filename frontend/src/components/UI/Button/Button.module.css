@@ -3,7 +3,6 @@
 	border-radius: 4px;
 	cursor: pointer;
 	font-weight: 700;
-	padding: 8px 12px;
 	background-color: var(--blue);
 	color: var(--white);
 	user-select: none;
@@ -13,6 +12,10 @@
 	justify-content: center;
 	align-items: center;
 	position: relative;
+}
+
+.pad {
+	padding: 8px 12px;
 }
 
 .btn:disabled {
@@ -35,7 +38,6 @@
 
 .transp {
 	background-color: transparent;
-	padding: 4px 8px;
 	color: var(--orange);
 	box-shadow: none;
 }

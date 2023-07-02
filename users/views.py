@@ -8,6 +8,8 @@ from .models import Users
 from basic.exceptions import *
 from basic.utils import *
 
+logger = get_logger(__name__)
+
 
 # Create your views here.
 def signup_user(req: HttpRequest):

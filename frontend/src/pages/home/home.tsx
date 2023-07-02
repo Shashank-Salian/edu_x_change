@@ -8,6 +8,7 @@ import classes from "./home.module.css";
 import { request } from "@/utils/utils";
 import PostView from "@/components/PostView/PostView";
 import usePagination from "@/hooks/usePagination";
+import Spinner from "@/components/UI/Spinner/Spinner";
 
 declare const __userData: UserData | undefined;
 
@@ -16,6 +17,7 @@ const HomePage = () => {
 
 	const [posts, setPosts] = useState<PostData[]>([]);
 	const [pauseScroll, setPauseScroll] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const page = useRef(1);
 
 	const getPosts = async () => {
@@ -23,6 +25,7 @@ const HomePage = () => {
 			setPauseScroll(true);
 			const rawData = await request(`/api/posts/recent/?page=${page.current}`);
 			const postData = await rawData.json();
+			setIsLoading(false);
 
 			if (postData.ok) {
 				if (postData.code === "END_OF_PAGE") {
@@ -33,6 +36,7 @@ const HomePage = () => {
 			}
 			setPauseScroll(false);
 		} catch (err) {
+			setIsLoading(false);
 			console.error(err);
 			setPauseScroll(false);
 		}
@@ -56,11 +60,17 @@ const HomePage = () => {
 		<div className={`${classes.container} main`}>
 			<Nav />
 			<div className={`container pad`}>
-				<h2>Home</h2>
+				<h2>Home :</h2>
 
-				{posts.map((post, i) => (
-					<PostView postData={post} key={i} />
-				))}
+				{isLoading ? (
+					<div className={`flx-c mt-40`}>
+						<Spinner />
+					</div>
+				) : posts.length === 0 ? (
+					<h2>Nothing to show</h2>
+				) : (
+					posts.map((post, i) => <PostView postData={post} key={i} />)
+				)}
 			</div>
 		</div>
 	);

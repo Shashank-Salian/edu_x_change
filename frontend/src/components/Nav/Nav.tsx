@@ -4,7 +4,7 @@ import Logo from "@/assets/logos/ExcWritten";
 import Button from "@/components/UI/Button/Button";
 import classes from "./Nav.module.css";
 import usePortal from "@/hooks/usePortal";
-import CreateCommunityCard from "@/components/home/CreateCommunity/CreateCommunityCard";
+import CreateCommunityCard from "@/components/CreateCommunity/CreateCommunityCard";
 import SearchInput from "../UI/Input/SearchInput";
 import { debounce, request } from "@/utils/utils";
 import { CommunityData, UserData } from "@/utils/types";

@@ -12,6 +12,13 @@ import { isValidCommunityName, request } from "@/utils/utils";
 
 type Props = {
 	onCloseClick?: JSX.MouseEventHandler<HTMLDivElement>;
+	defaultVal?: {
+		commName: string;
+		topic: string;
+		description: string;
+		icon?: File;
+	};
+	update?: boolean;
 };
 
 type ErrorMsg = {
@@ -20,19 +27,27 @@ type ErrorMsg = {
 };
 
 const CreateCommunityCard = (props: Props) => {
-	const [iconInpData, setIconInpData] = useState<{ file: File; url: string }>();
+	const defIcon = props.defaultVal?.icon
+		? {
+				file: props.defaultVal.icon,
+				url: URL.createObjectURL(props.defaultVal.icon),
+		  }
+		: undefined;
+	const [iconInpData, setIconInpData] = useState<
+		{ file: File; url: string } | undefined
+	>(defIcon);
 	const [textInpData, setTextInpData] = useState({
 		commName: {
 			name: "community-name",
-			value: "",
+			value: props.defaultVal?.commName || "",
 		},
 		topic: {
 			name: "community-topic",
-			value: "",
+			value: props.defaultVal?.topic || "",
 		},
 		description: {
 			name: "community-description",
-			value: "",
+			value: props.defaultVal?.description || "",
 		},
 	});
 	const [errorMsg, setErrorMsg] = useState<ErrorMsg>({
@@ -94,6 +109,16 @@ const CreateCommunityCard = (props: Props) => {
 		});
 	};
 
+	const isFileEqual = (file1: File, file2: File) => {
+		if (file1.name !== file2.name) return false;
+
+		if (file1.size !== file2.size) return false;
+
+		if (file1.type !== file2.type) return false;
+
+		return true;
+	};
+
 	const onSubmit: JSX.GenericEventHandler<HTMLFormElement> = async (e) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
@@ -110,13 +135,23 @@ const CreateCommunityCard = (props: Props) => {
 			formData.append("description", textInpData.description.value);
 
 			if (iconInpData) {
-				formData.append("communityIcon", iconInpData.file);
+				console.log("Adding icon file");
+				if (!props.update) {
+					formData.append("communityIcon", iconInpData.file);
+				} else if (!props.defaultVal?.icon) {
+					formData.append("communityIcon", iconInpData.file);
+				} else if (!isFileEqual(iconInpData.file, props.defaultVal.icon)) {
+					console.log("Adding icon file");
+					formData.append("communityIcon", iconInpData.file);
+				}
 			}
 
 			try {
 				setIsLoading(true);
 				const rawRes = await request(
-					"/api/community/create/",
+					`/api/community/${
+						props.update ? `update/${props.defaultVal?.commName}/` : "create/"
+					}`,
 					formData,
 					"POST"
 				);
@@ -134,6 +169,7 @@ const CreateCommunityCard = (props: Props) => {
 						message: res.message,
 						mode: "success",
 					});
+					location.pathname = `/x/${res.data.name}`;
 				}
 			} catch (err) {
 				setIsLoading(false);
@@ -151,12 +187,18 @@ const CreateCommunityCard = (props: Props) => {
 		<>
 			<Card
 				className={`${classes.container}`}
-				heading='Create Community :'
+				heading={`${props.update ? "Update" : "Create"} Community :`}
 				boldHead
 				icon='close'
 				onIconClick={props.onCloseClick}
 			>
-				<form action='/api/community/create/' method='post' onSubmit={onSubmit}>
+				<form
+					action={`/api/community/${
+						props.update ? `update/${props.defaultVal?.commName}/` : "create/"
+					}`}
+					method='post'
+					onSubmit={onSubmit}
+				>
 					<div className={`mt-10 mb-20 ${classes.wrapper}`}>
 						<span className={`${classes.label}`}>Community icon :</span>
 						<FileInput
@@ -209,7 +251,7 @@ const CreateCommunityCard = (props: Props) => {
 					</span>
 					<div className={`mt-20 flx-c`}>
 						<Button loading={isLoading} type='submit' size='large'>
-							Create community
+							{props.update ? "Update" : "Create"} community
 						</Button>
 					</div>
 				</form>

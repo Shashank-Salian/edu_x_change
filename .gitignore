@@ -33,3 +33,5 @@ ENV/
 node_modules/
 
 userassets/
+dist/
+static_root/

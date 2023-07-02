@@ -1,5 +1,5 @@
 import { JSX } from "preact";
-import { useState, useRef } from "preact/hooks";
+import { useState } from "preact/hooks";
 
 import { PostData, UserData } from "@/utils/types";
 import MarkdownViewer from "../MarkdownEditor/MarkdownViewer";

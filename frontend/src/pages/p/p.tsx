@@ -4,7 +4,7 @@ import Nav from "@/components/Nav/Nav";
 import PostView from "@/components/PostView/PostView";
 import { PostData } from "@/utils/types";
 import MarkdownEditor from "@/components/MarkdownEditor/MarkdownEditor";
-import classes from "./postpage.module.css";
+import classes from "./p.module.css";
 import FileInput from "@/components/UI/Input/FileInput";
 import { useEffect, useRef, useState } from "preact/hooks";
 import Button from "@/components/UI/Button/Button";

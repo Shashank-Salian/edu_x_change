@@ -8,10 +8,9 @@ import json
 
 from posts.models import Posts
 
-from .utils import get_user_data, get_post_data
+from .utils import get_user_data, get_post_data, get_logger
 
-static_page_cache = {}
-
+logger = get_logger(__name__)
 
 @login_required
 def home(req: HttpRequest):

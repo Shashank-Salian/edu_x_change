@@ -29,7 +29,7 @@ export default defineConfig({
 	},
 	build: {
 		manifest: true,
-		outDir: "./dist/vite",
+		outDir: "../../dist/vite",
 		rollupOptions: {
 			input: getInputFiles(),
 		},

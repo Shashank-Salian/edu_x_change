@@ -11,6 +11,8 @@ from community.models import Community
 from .models import Posts, PostsFilesStore
 from users.models import Users
 
+logger = get_logger(__name__)
+
 
 def create_post_and_respond(user,
                             title=None,
@@ -191,6 +193,9 @@ def save(req: HttpRequest):
 		drafted.community = community
 		drafted.is_drafted = False
 
+		drafted.validate_post()
+		drafted.save()
+
 		for note in notes:
 			f_name = f"{time.time()}_{drafted.id}_{note.name}"
 			file_store = PostsFilesStore(notes_file=note,
@@ -198,8 +203,6 @@ def save(req: HttpRequest):
 			file_store.save()
 			drafted.files.add(file_store)
 
-		drafted.validate_post()
-		drafted.save()
 		resp = success_resp_data("Post created successfully")
 		return JsonResponse(resp)
 	except Posts.DoesNotExist:

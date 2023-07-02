@@ -14,6 +14,7 @@ type Props = {
 	noShadow?: boolean;
 	className?: string;
 	type?: string;
+	noPad?: boolean;
 };
 
 const Button = (props: Props) => {
@@ -22,7 +23,9 @@ const Button = (props: Props) => {
 			<button
 				className={`${classes.btn} ${props.color ? classes[props.color] : ""} ${
 					props.size ? classes[props.size] : ""
-				} ${props.noShadow ? classes.noShadow : ""} ${props.className || ""}`}
+				} ${props.noShadow ? classes.noShadow : ""} ${
+					props.noPad ? "" : classes.pad
+				} ${props.className || ""}`}
 				onClick={props.onClick}
 				disabled={props.loading ? true : props.disabled}
 				type={props.type}

@@ -12,6 +12,7 @@ urlpatterns = [
         "removeparticipant/<str:c_name>",
         views.remove_participant,
     ),
+	path('update/<str:c_name>/', views.update),
     path("leave/<str:c_name>/", views.leave_community, name="leave_community"),
     path("icon/<str:c_name>/", views.community_icon, name="community_icon"),
     path("posts/<str:c_name>/", views.comm_posts),

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import { request } from "@/utils/utils";
+import { getCookie, request } from "@/utils/utils";
 import { PostData, UserData } from "@/utils/types";
 import PostView from "../PostView/PostView";
 import Button from "../UI/Button/Button";
@@ -12,6 +12,8 @@ import usePortal from "@/hooks/usePortal";
 import Card from "../Card/Card";
 import ProfileList from "../UI/List/ProfileList";
 import usePagination from "@/hooks/usePagination";
+import Edit from "@/assets/icons/Edit";
+import CreateCommunityCard from "../CreateCommunity/CreateCommunityCard";
 
 type Props = {
 	data: CommunityData;
@@ -98,6 +100,8 @@ const CommunityCard = ({ data }: Props) => {
 const Head = ({ data }: Props) => {
 	const [participants, setParticipants] = useState<UserData[]>([]);
 	const [showParticipants, setShowParticipants] = useState(false);
+	const [showEditCard, setShowEditCard] = useState(false);
+	const [iconFile, setIconFile] = useState<File>();
 
 	const onLeaveClick = async () => {
 		try {
@@ -213,6 +217,46 @@ const Head = ({ data }: Props) => {
 			onBackdropClick: closeParticipants,
 		}
 	);
+	const onEditCommunityClick = () => {
+		setShowEditCard((old) => !old);
+	};
+
+	useEffect(() => {
+		const getIconFile = async () => {
+			const raw = await fetch(`${data.iconPath}/`, {
+				headers: new Headers({
+					"X-CSRFToken": getCookie("csrftoken") || "",
+				}),
+				redirect: "manual",
+			});
+			console.log(raw);
+			const file = await raw.blob();
+			console.log(file);
+			if (raw.headers.get("image-found") === "true") {
+				setIconFile(
+					new File([file], `${data.name}.png`, { type: "image/png" })
+				);
+			}
+		};
+
+		if (__userData.username === data.moderator) getIconFile();
+	}, []);
+
+	if (data.moderator === __userData.username) {
+		usePortal(
+			<CreateCommunityCard
+				update
+				defaultVal={{
+					commName: data.name,
+					description: data.description,
+					topic: data.topic,
+					icon: iconFile,
+				}}
+				onCloseClick={onEditCommunityClick}
+			/>,
+			{ show: showEditCard }
+		);
+	}
 
 	return (
 		<div className={`${classes.headContainer} ${classes.pad} lite-shadow`}>
@@ -229,6 +273,16 @@ const Head = ({ data }: Props) => {
 						<h2>
 							<span className={classes.x}>x/</span>
 							{data.name}
+							{data.moderator === __userData.username ? (
+								<Button
+									className='ml-40 flx-c'
+									onClick={onEditCommunityClick}
+									noPad
+									color='transp'
+								>
+									<Edit width='28' />
+								</Button>
+							) : null}
 						</h2>
 						<span>
 							Topic : <span style={{ fontWeight: "600" }}>{data.topic}</span>

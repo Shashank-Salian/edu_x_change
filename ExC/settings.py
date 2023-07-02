@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+import dotenv
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -28,7 +29,7 @@ SECRET_KEY = 'django-insecure-ijv@yygb^=gt_m2otnx7pp0xq!!&t6+!@qnw=gkxykh0q@x&es
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = 'users.Users'
 
@@ -39,11 +40,11 @@ LOGIN_URL = "/login/"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'salianshashank007@gmail.com'
-EMAIL_HOST_PASSWORD = 'izojlcflcyfykfoq'
+EMAIL_HOST_USER = os.getenv("EMAIL_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASS")
 EMAIL_USE_TLS = True
 
-DEFAULT_FROM_EMAIL = 'salianshashank007@gmail.com'
+DEFAULT_FROM_EMAIL = os.getenv("EMAIL_USER")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -145,14 +146,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = str(BASE_DIR / 'static_root')
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    str(BASE_DIR / 'static'),
 ]
 
 # Where ViteJS assets are built.
-DJANGO_VITE_ASSETS_PATH = BASE_DIR / "frontend" / "dist"
+DJANGO_VITE_ASSETS_PATH = str(BASE_DIR / "dist")
 
 # If use HMR or not.
 DJANGO_VITE_DEV_MODE = DEBUG

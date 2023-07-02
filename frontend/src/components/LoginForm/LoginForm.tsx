@@ -94,7 +94,6 @@ const LoginForm = (_props: Props) => {
 		e: TargetedEvent<HTMLInputElement | HTMLTextAreaElement>,
 		i: number
 	) => {
-		console.log(i);
 		setSignupData((oldData) => {
 			const newData = [...oldData];
 
@@ -112,7 +111,6 @@ const LoginForm = (_props: Props) => {
 			newData[i].value = e.currentTarget.value;
 			return newData;
 		});
-		console.log(signinData[i].value);
 	};
 
 	/**
@@ -125,8 +123,6 @@ const LoginForm = (_props: Props) => {
 		userName: string,
 		password: string
 	) => {
-		console.log(fullName, email, userName, password);
-
 		const formData = new FormData();
 		formData.append("fullName", fullName);
 		formData.append("email", email);
