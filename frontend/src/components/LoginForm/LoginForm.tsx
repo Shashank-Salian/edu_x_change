@@ -65,7 +65,7 @@ const LoginForm = (_props: Props) => {
 				isValidEmail(initSignInData[0].value) ||
 				isValidUsername(initSignInData[0].value),
 			value: "",
-			placeholder: "Username or Email",
+			placeholder: "Username",
 		},
 		{
 			id: "loginPassword",
@@ -96,8 +96,12 @@ const LoginForm = (_props: Props) => {
 	) => {
 		setSignupData((oldData) => {
 			const newData = [...oldData];
+			let newVal = e.currentTarget.value;
 
-			newData[i].value = e.currentTarget.value;
+			if (i === 1 || i === 2) {
+				newVal = newVal.toLowerCase();
+			}
+			newData[i].value = newVal;
 			return newData;
 		});
 	};
@@ -108,7 +112,12 @@ const LoginForm = (_props: Props) => {
 	) => {
 		setSigninData((oldData) => {
 			const newData = [...oldData];
-			newData[i].value = e.currentTarget.value;
+			let newVal = e.currentTarget.value;
+
+			if (i === 0) {
+				newVal = newVal.toLowerCase();
+			}
+			newData[i].value = newVal;
 			return newData;
 		});
 	};
@@ -210,12 +219,70 @@ const LoginForm = (_props: Props) => {
 				setIsLoading(false);
 				return;
 			}
+
+			if (!signupData[0].isValid()) {
+				setMessageData({
+					message: "Name must be at least 2 characters long",
+					type: "error",
+				});
+				return;
+			}
+
+			if (!signupData[1].isValid()) {
+				setMessageData({
+					message: "Enter valid email",
+					type: "error",
+				});
+				return;
+			}
+
+			if (!signupData[2].isValid()) {
+				setMessageData({
+					message:
+						"Username must be all lower case letters and only numbers and '_' allowed",
+					type: "error",
+				});
+				return;
+			}
+
+			if (!signupData[3].isValid()) {
+				setMessageData({
+					message: "Password must be at least 8 characters long",
+					type: "error",
+				});
+				return;
+			}
+
+			if (!signupData[4].isValid()) {
+				setMessageData({
+					message: "Password doesn't match",
+					type: "error",
+				});
+			}
+			return;
 		}
 
 		if (signinData.every((ele) => ele.isValid())) {
 			setIsLoading(true);
 			await signIn(signinData[0].value, signinData[1].value).catch(() => {});
 			setIsLoading(false);
+			return;
+		}
+
+		if (!signinData[0].isValid()) {
+			setMessageData({
+				message:
+					"Username must be all lower case letters and only numbers and '_' allowed",
+				type: "error",
+			});
+			return;
+		}
+
+		if (!signinData[1].isValid()) {
+			setMessageData({
+				message: "Enter valid password",
+				type: "error",
+			});
 			return;
 		}
 

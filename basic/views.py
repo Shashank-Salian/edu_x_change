@@ -4,6 +4,7 @@ from django.middleware.csrf import get_token
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 import json
 
 from posts.models import Posts
@@ -77,7 +78,7 @@ def not_found(req: HttpRequest):
 
 
 def favicon(req: HttpRequest):
-	with open('static/EXC.svg') as f:
+	with open(f'{settings.STATIC_ROOT}/EXC.svg') as f:
 		return HttpResponse(f.read(),
 		                    content_type="image/svg+xml; charset=utf-8")
-	# return HttpResponse()
+	return HttpResponse("")

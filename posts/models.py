@@ -69,4 +69,9 @@ class Posts(Model):
 		super().delete(*args, **kwargs)
 
 	def __str__(self) -> str:
-		return self.title
+		res = "__EMPTY_POST__"
+		if self.body is not None and self.body.replace(" ", "") != "":
+			res = self.body[:30]
+		if self.title is not None and self.title.replace(" ", "") != "":
+			res = self.title
+		return res
